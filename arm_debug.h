@@ -42,6 +42,8 @@ public:
 
     ARMDebug(unsigned clockPin, unsigned dataPin, LogLevel logLevel = LOG_NORMAL);
 
+    //////////////// Higher level API
+
     /**
      * Reinitialize the debug interface, and identify the connected chip.
      * This resets the target chip, putting it in SWD mode and logging its
@@ -83,17 +85,8 @@ public:
     void setLogLevel(LogLevel newLevel);
     void setLogLevel(LogLevel newLevel, LogLevel &prevLevel);
 
-private:
-    uint8_t clockPin, dataPin, fastPins;
-    LogLevel logLevel;
+    //////////////// Lower level API
 
-    // Cached versions of ARM debug registers
-    struct {
-        uint32_t select;
-        uint32_t csw;
-    } cache;
-
-protected:
     // Low-level wire interface (LSB-first)
     void wireWrite(uint32_t data, unsigned nBits);
     uint32_t wireRead(unsigned nBits);
@@ -178,4 +171,14 @@ protected:
 
     static const unsigned CSW_DEFAULTS = CSW_DBGSWENABLE | CSW_MASTER_DEBUG | CSW_HPROT;
     static const unsigned DEFAULT_RETRIES = 50;
+
+private:
+    uint8_t clockPin, dataPin, fastPins;
+    LogLevel logLevel;
+
+    // Cached versions of ARM debug registers
+    struct {
+        uint32_t select;
+        uint32_t csw;
+    } cache;
 };
