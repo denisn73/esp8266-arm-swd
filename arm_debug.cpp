@@ -94,19 +94,24 @@ bool ARMDebug::debugPortPowerup()
 
 bool ARMDebug::debugPortReset()
 {
+    const uint32_t reset_deassert = CSYSPWRUPREQ | CDBGPWRUPREQ;
+    const uint32_t reset_asserted = reset_deassert | CDBGRSTREQ;
+
     // Reset the debug access port
-    if (!dpWrite(CTRLSTAT, false, CSYSPWRUPREQ | CDBGPWRUPREQ | CDBGRSTREQ))
+    if (!dpWrite(CTRLSTAT, false, reset_deassert))
+        return false;
+    if (!dpWrite(CTRLSTAT, false, reset_asserted))
         return false;
 
     // Wait for reset acknowledgment
     uint32_t ctrlstat;
-    if (!dpReadPoll(CTRLSTAT, ctrlstat, CDBGPWRUPACK | CSYSPWRUPACK | CDBGRSTACK, -1)) {
+    if (!dpReadPoll(CTRLSTAT, ctrlstat, reset_asserted, -1)) {
         log(LOG_ERROR, "ARMDebug: Debug port failed to reset (CTRLSTAT: %08x)", ctrlstat);
         return false;
     }
 
     // Clear reset request bit (leave power requests on)
-    if (!dpWrite(CTRLSTAT, false, CSYSPWRUPREQ | CDBGPWRUPREQ))
+    if (!dpWrite(CTRLSTAT, false, reset_deassert))
         return false;
 
     return true;
@@ -369,6 +374,7 @@ bool ARMDebug::dpReadPoll(unsigned addr, uint32_t &data, uint32_t mask, uint32_t
             return false;
         if ((data & mask) == expected)
             return true;
+        yield();
     } while (retries--);
 
     log(LOG_ERROR, "ARMDebug: Timed out while polling DP ([%08x] & %08x == %08x). Current value: %08x",
@@ -384,6 +390,7 @@ bool ARMDebug::apReadPoll(unsigned addr, uint32_t &data, uint32_t mask, uint32_t
             return false;
         if ((data & mask) == expected)
             return true;
+        yield();
     } while (retries--);
 
     log(LOG_ERROR, "ARMDebug: Timed out while polling AP ([%08x] & %08x == %08x). Current value: %08x",
@@ -399,6 +406,7 @@ bool ARMDebug::memPoll(unsigned addr, uint32_t &data, uint32_t mask, uint32_t ex
             return false;
         if ((data & mask) == expected)
             return true;
+        yield();
     } while (retries--);
 
     log(LOG_ERROR, "ARMDebug: Timed out while polling MEM ([%08x] & %08x == %08x). Current value: %08x",
@@ -414,6 +422,7 @@ bool ARMDebug::memPollByte(unsigned addr, uint8_t &data, uint8_t mask, uint8_t e
             return false;
         if ((data & mask) == expected)
             return true;
+        yield();
     } while (retries--);
 
     log(LOG_ERROR, "ARMDebug: Timed out while polling MEM ([%08x] & %02x == %02x). Current value: %02x",
