@@ -4,6 +4,9 @@
 //     for remote control of an ARM microcontroller
 //      via its Serial Wire Debug port.
 //
+//    Designed for the FRDM-KE04Z dev kit as an example target,
+//    with its MKE04Z8VFK4 Cortex M0+ micro.
+//
 ////////////////////////////////////////////////////////////////
 
 // Copyright (c) 2015 Micah Elizabeth Scott
@@ -23,19 +26,67 @@
 const int swd_clock_pin = 0;
 const int swd_data_pin = 2;
 
+////////////////////////////////////////////////////////////////
+
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include "arm_debug.h"
 #include "arm_kinetis_debug.h"
+#include "arm_kinetis_reg.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin);
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_MEM);
+
+void appendHex32(String &buffer, uint32_t word)
+{
+    char tmp[10];
+    sprintf(tmp, "0x%08X", word);
+    buffer += tmp;
+}
 
 void handleWebRoot()
 {
-    server.send(200, "text/html", "<html><body>Ohai again!</body></html>");
+    String output = "<html><body><pre>";
+
+    output += "Howdy, neighbor!\n";
+    output += "Nice to <a href=\"https://github.com/scanlime/esp8266-arm-swd\">meet you</a>.\n\n";
+
+    if (!target.begin()) {
+        output += "Unfortunately,\n";
+        output += "I failed to connect to the debug port.\n";
+        output += "Check your wiring maybe?\n";
+    } else {
+        output += "Connected to the ARM debug port.\n";
+
+        uint32_t idcode;
+        if (target.getIDCODE(idcode)) {
+            output += "This processor has an IDCODE of ";
+            appendHex32(output, idcode);
+            output += "\n";
+        }
+
+        if (target.detect()) {
+            output += "Freescale Kinetis extensions too.\n";
+            if (target.startup()) {
+                output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
+            }
+        }
+    }
+
+    output += "Some memory... ";
+    uint32_t addr = 0x1ffff000;
+    uint32_t word;
+    for (unsigned i = 0; i < 8; i++) {
+        if (target.memLoad(addr, word)) {
+            appendHex32(output, word);
+        }
+        addr += 4;
+    }
+
+    output += "</pre></body></html>";
+    server.send(200, "text/html", output);
 }
 
 void setup(void)
