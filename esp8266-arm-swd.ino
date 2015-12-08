@@ -3,13 +3,16 @@
  * of an ARM microcontroller via its Serial Wire Debug port.
  */
 
-const char* host = "esp8266-swd";
-const char* ssid = "........";
-const char* password = "........";
+// Please edit wifi_config.h to set up your access point.
 
-const int led_pin = 0;
-const int swd_clock_pin = 2;
-const int swd_data_pin = 15;
+#include "wifi_config.h"
+
+// ESP-01: GPIO0 = swdclk, GPIO2 = swdio
+// NodeMCU devkit: D3 = swdclk, D4 = swdio
+// SWD header: pin1 = 3.3v, pin2 = swdio, pin3 = gnd, pin4 = swdclk
+
+const int swd_clock_pin = 0;
+const int swd_data_pin = 2;
 
 /* 
  * Copyright (c) 2015 Micah Elizabeth Scott
@@ -36,12 +39,16 @@ const int swd_data_pin = 15;
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <ESP8266HTTPUpdateServer.h>
 #include "arm_debug.h"
 #include "arm_kinetis_debug.h"
 
-ESP8266WebServer httpServer(80);
+ESP8266WebServer server(80);
 ARMKinetisDebug target(swd_clock_pin, swd_data_pin);
+
+void handleWebRoot()
+{
+    server.send(200, "text/html", "<html><body>Ohai!</body></html>");
+}
 
 void setup(void)
 {
@@ -54,8 +61,11 @@ void setup(void)
         WiFi.begin(ssid, password);
         Serial.println("Wifi retrying...");
     }
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 
-    httpServer.begin();
+    server.on("/", handleWebRoot);
+    server.begin();
 
     MDNS.begin(host);
     MDNS.addService("http", "tcp", 80);
@@ -65,11 +75,6 @@ void setup(void)
 
 void loop(void)
 {
-    httpServer.handleClient();
-
-    // LED on when we're idle and ready
-    pinMode(led_pin, OUTPUT);
-    digitalWrite(led_pin, HIGH);
+    server.handleClient();
     delay(1);
-    digitalWrite(led_pin, LOW);
 }
