@@ -94,24 +94,22 @@ bool ARMDebug::debugPortPowerup()
 
 bool ARMDebug::debugPortReset()
 {
-    const uint32_t reset_deassert = CSYSPWRUPREQ | CDBGPWRUPREQ;
-    const uint32_t reset_asserted = reset_deassert | CDBGRSTREQ;
+    const uint32_t powerup = CSYSPWRUPREQ | CDBGPWRUPREQ;
+    const uint32_t reset_request = powerup | CDBGRSTREQ;
 
     // Reset the debug access port
-    if (!dpWrite(CTRLSTAT, false, reset_deassert))
-        return false;
-    if (!dpWrite(CTRLSTAT, false, reset_asserted))
+    if (!dpWrite(CTRLSTAT, false, reset_request))
         return false;
 
     // Wait for reset acknowledgment
     uint32_t ctrlstat;
-    if (!dpReadPoll(CTRLSTAT, ctrlstat, reset_asserted, -1)) {
+    if (!dpReadPoll(CTRLSTAT, ctrlstat, CDBGRSTACK, -1)) {
         log(LOG_ERROR, "ARMDebug: Debug port failed to reset (CTRLSTAT: %08x)", ctrlstat);
         return false;
     }
 
     // Clear reset request bit (leave power requests on)
-    if (!dpWrite(CTRLSTAT, false, reset_deassert))
+    if (!dpWrite(CTRLSTAT, false, powerup))
         return false;
 
     return true;

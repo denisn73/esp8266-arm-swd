@@ -22,6 +22,7 @@
 //
 // And for reference:
 //    SWD header      pin1 = 3.3v, pin2 = swdio, pin3 = gnd, pin4 = swdclk
+//    SWD over JTAG   TCLK = swdclk, TMS = swdio
 
 const int swd_clock_pin = 0;
 const int swd_data_pin = 2;
@@ -37,7 +38,7 @@ const int swd_data_pin = 2;
 #include "arm_kinetis_reg.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_DP);
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NORMAL);
 
 void appendHex32(String &buffer, uint32_t word)
 {
@@ -71,14 +72,22 @@ void handleWebRoot()
     if (target.startup()) {
         output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
 
-        output += "Some memory... ";
-        uint32_t addr = 0x1ffff000;
+        output += "\nSome memory...\n\n";
+        uint32_t addr = 0x1000;
         uint32_t word;
-        for (unsigned i = 0; i < 8; i++) {
-            if (target.memLoad(addr, word)) {
-                appendHex32(output, word);
+        for (unsigned i = 0; i < 128; i++) {
+            appendHex32(output, addr);
+            output += ":";
+            for (unsigned j = 0; j < 4; j++) {
+                output += " ";
+                if (target.memLoad(addr, word)) {
+                    appendHex32(output, word);
+                } else {
+                    output += "--------";
+                }
+                addr += 4;
             }
-            addr += 4;
+            output += "\n";
         }
     }
 
