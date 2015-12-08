@@ -37,7 +37,7 @@ const int swd_data_pin = 2;
 #include "arm_kinetis_reg.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_MEM);
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_DP);
 
 void appendHex32(String &buffer, uint32_t word)
 {
@@ -57,34 +57,32 @@ void handleWebRoot()
         output += "Unfortunately,\n";
         output += "I failed to connect to the debug port.\n";
         output += "Check your wiring maybe?\n";
-    } else {
-        output += "Connected to the ARM debug port.\n";
+        goto done;
+    }
+    output += "Connected to the ARM debug port.\n";
 
-        uint32_t idcode;
-        if (target.getIDCODE(idcode)) {
-            output += "This processor has an IDCODE of ";
-            appendHex32(output, idcode);
-            output += "\n";
-        }
+    uint32_t idcode;
+    if (target.getIDCODE(idcode)) {
+        output += "This processor has an IDCODE of ";
+        appendHex32(output, idcode);
+        output += "\n";
+    }
 
-        if (target.detect()) {
-            output += "Freescale Kinetis extensions too.\n";
-            if (target.startup()) {
-                output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
+    if (target.startup()) {
+        output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
+
+        output += "Some memory... ";
+        uint32_t addr = 0x1ffff000;
+        uint32_t word;
+        for (unsigned i = 0; i < 8; i++) {
+            if (target.memLoad(addr, word)) {
+                appendHex32(output, word);
             }
+            addr += 4;
         }
     }
 
-    output += "Some memory... ";
-    uint32_t addr = 0x1ffff000;
-    uint32_t word;
-    for (unsigned i = 0; i < 8; i++) {
-        if (target.memLoad(addr, word)) {
-            appendHex32(output, word);
-        }
-        addr += 4;
-    }
-
+done:
     output += "</pre></body></html>";
     server.send(200, "text/html", output);
 }
@@ -92,7 +90,7 @@ void handleWebRoot()
 void setup(void)
 {
     Serial.begin(115200);
-    Serial.println("Starting up...");
+    Serial.println("\n\n~ Starting up ~\n");
 
     WiFi.mode(WIFI_AP_STA);
     WiFi.begin(ssid, password);
