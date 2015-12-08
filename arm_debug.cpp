@@ -72,13 +72,6 @@ bool ARMDebug::getIDCODE(uint32_t &idcode)
         log(LOG_ERROR, "No ARM processor detected. Check power and cables?");
         return false;
     }
-    
-    // Verify debug port part number only. This isn't allowed to change, and it's a good early sanity check.
-    if ((idcode & 0x0FF00001) != 0x0ba00001) {
-        // For reference, the K20's IDCODE is 0x4ba00477 over JTAG vs. 0x2ba01477 over SWD.
-        log(LOG_ERROR, "ARM Debug Port has an incorrect part number (IDCODE: %08x)", idcode);
-        return false;
-    }
 
     return true;
 }
