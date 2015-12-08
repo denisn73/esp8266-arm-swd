@@ -1,6 +1,3 @@
-# Ignore changes to wifi_config.h, to discourage checking in wifi passwords
-wifi_config.h
-
 # Compiled Object files
 *.slo
 *.lo
