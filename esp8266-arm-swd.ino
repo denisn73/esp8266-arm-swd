@@ -37,37 +37,39 @@ const int swd_data_pin = 15;
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include "arm_debug.h"
+#include "arm_kinetis_debug.h"
 
 ESP8266WebServer httpServer(80);
 ARMKinetisDebug target(swd_clock_pin, swd_data_pin);
 
 void setup(void)
 {
-  Serial.begin(115200);
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.begin(115200);
+    Serial.println("Starting up...");
+
+    WiFi.mode(WIFI_AP_STA);
     WiFi.begin(ssid, password);
-    Serial.println("Wifi retrying...");
-  }
+    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        WiFi.begin(ssid, password);
+        Serial.println("Wifi retrying...");
+    }
 
-  MDNS.begin(host);
+    httpServer.begin();
 
-  httpUpdater.setup(&httpServer);
-  httpServer.begin();
+    MDNS.begin(host);
+    MDNS.addService("http", "tcp", 80);
 
-  MDNS.addService("http", "tcp", 80);
-  Serial.printf("Server is running at http://%s.local/\n", host);
+    Serial.printf("Server is running at http://%s.local/\n", host);
 }
 
 void loop(void)
 {
-  httpServer.handleClient();
+    httpServer.handleClient();
 
-  // LED on when we're idle and ready
-  pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, HIGH);
-  delay(1);
-  digitalWrite(led_pin, LOW);
+    // LED on when we're idle and ready
+    pinMode(led_pin, OUTPUT);
+    digitalWrite(led_pin, HIGH);
+    delay(1);
+    digitalWrite(led_pin, LOW);
 }
-

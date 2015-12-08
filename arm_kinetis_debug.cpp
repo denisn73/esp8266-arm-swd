@@ -320,8 +320,8 @@ bool ARMKinetisDebug::flashSectorBufferInit()
         ftfl_setFlexRAMFunction(0xFF) &&
         memStoreAndVerify(REG_FLEXRAM_BASE, 0x12345678) &&
         memStoreAndVerify(REG_FLEXRAM_BASE, 0xFFFFFFFF) &&
-        memStoreAndVerify(REG_FLEXRAM_BASE + FLASH_SECTOR_SIZE - 4, 0xA5559872) &&
-        memStoreAndVerify(REG_FLEXRAM_BASE + FLASH_SECTOR_SIZE - 4, 0xFFFFFFFF);
+        memStoreAndVerify(REG_FLEXRAM_BASE + kFlashSectorSize - 4, 0xA5559872) &&
+        memStoreAndVerify(REG_FLEXRAM_BASE + kFlashSectorSize - 4, 0xFFFFFFFF);
 }
 
 bool ARMKinetisDebug::flashSectorBufferWrite(uint32_t bufferOffset, const uint32_t *data, unsigned count)
@@ -330,7 +330,7 @@ bool ARMKinetisDebug::flashSectorBufferWrite(uint32_t bufferOffset, const uint32
         log(LOG_ERROR, "ARMKinetisDebug::flashSectorBufferWrite alignment error");
         return false;
     }
-    if (bufferOffset + (count * sizeof *data) > FLASH_SECTOR_SIZE) {
+    if (bufferOffset + (count * sizeof *data) > kFlashSectorSize) {
         log(LOG_ERROR, "ARMKinetisDebug::flashSectorBufferWrite overrun");
         return false;
     }
@@ -345,7 +345,7 @@ bool ARMKinetisDebug::flashSectorProgram(uint32_t address)
         return false;
     }
 
-    return ftfl_programSection(address, FLASH_SECTOR_SIZE/4);
+    return ftfl_programSection(address, kFlashSectorSize/4);
 }
 
 bool ARMKinetisDebug::ftfl_busyWait()
@@ -407,17 +407,17 @@ bool ARMKinetisDebug::ftfl_handleCommandStatus(const char *cmdSpecificError)
     if (!memLoad(REG_FTFL_FSTAT, fstat))
         return false;
 
-    if (fstat & FTFL_FSTAT_RDCOLERR) {
+    if (fstat & REG_FTFL_FSTAT_RDCOLERR) {
         log(LOG_ERROR, "FLASH: Bus collision error (FSTAT: %08x)", fstat);
         return false;
     }
 
-    if (fstat & (FTFL_FSTAT_FPVIOL | FTFL_FSTAT_ACCERR)) {
+    if (fstat & (REG_FTFL_FSTAT_FPVIOL | REG_FTFL_FSTAT_ACCERR)) {
         log(LOG_ERROR, "FLASH: Address access error (FSTAT: %08x)", fstat);
         return false;
     }
 
-    if (cmdSpecificError && (fstat & FTFL_FSTAT_MGSTAT0)) {
+    if (cmdSpecificError && (fstat & REG_FTFL_FSTAT_MGSTAT0)) {
         // Command-specifid error
         log(LOG_ERROR, cmdSpecificError, fstat);
         return false;
@@ -585,5 +585,5 @@ bool ARMKinetisDebug::digitalWritePort(unsigned port, unsigned value)
 
 bool ARMKinetisDebug::usbSetPullup(bool enable)
 {
-    return memStoreByte(REG_USB0_CONTROL, enable ? USB_CONTROL_DPPULLUPNONOTG : 0);
+    return memStoreByte(REG_USB0_CONTROL, enable ? REG_USB_CONTROL_DPPULLUPNONOTG : 0);
 }

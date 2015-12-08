@@ -83,7 +83,7 @@ public:
             bool isVerifying;
     };
 
-    static const uint32_t FLASH_SECTOR_SIZE = 1024;
+    static const uint32_t kFlashSectorSize = 1024;
 
     // Port constants. (Corresponds to PCR address base)
     enum Port {
