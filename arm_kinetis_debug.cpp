@@ -42,7 +42,14 @@ bool ARMKinetisDebug::detect()
     uint32_t idr;
     if (!apRead(REG_MDM_IDR, idr))
         return false;
-    if (idr != 0x001C0000) {
+
+    /*
+     * This needs verification, but I think the low half is a version number.
+     * The K20 CPU from Fadecandy has an IDR of 0x001c0000,
+     * but the Cortex-M0 based KE04Z has an IDR of 0x001c0020. Okay then!
+     */
+
+    if ((idr & 0xffff0000) != 0x001C0000) {
         log(LOG_ERROR, "ARMKinetisDebug: Didn't find a supported MDM-AP peripheral");
         return false;
     }

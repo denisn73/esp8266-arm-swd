@@ -38,7 +38,7 @@ const int swd_data_pin = 2;
 #include "arm_kinetis_reg.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NORMAL);
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_AP);
 
 void appendHex32(String &buffer, uint32_t word)
 {
@@ -49,6 +49,9 @@ void appendHex32(String &buffer, uint32_t word)
 
 void handleWebRoot()
 {
+    uint32_t addr = 0x1000;
+    uint32_t word, idcode;
+
     String output = "<html><body><pre>";
 
     output += "Howdy, neighbor!\n";
@@ -62,7 +65,6 @@ void handleWebRoot()
     }
     output += "Connected to the ARM debug port.\n";
 
-    uint32_t idcode;
     if (target.getIDCODE(idcode)) {
         output += "This processor has an IDCODE of ";
         appendHex32(output, idcode);
@@ -71,24 +73,25 @@ void handleWebRoot()
 
     if (target.startup()) {
         output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
+    } else {
+        output += "No supported chip-specific interface was detected, alas.\n";
+        goto done;
+    }
 
-        output += "\nSome memory...\n\n";
-        uint32_t addr = 0x1000;
-        uint32_t word;
-        for (unsigned i = 0; i < 128; i++) {
-            appendHex32(output, addr);
-            output += ":";
-            for (unsigned j = 0; j < 4; j++) {
-                output += " ";
-                if (target.memLoad(addr, word)) {
-                    appendHex32(output, word);
-                } else {
-                    output += "--------";
-                }
-                addr += 4;
+    output += "\nSome memory...\n\n";
+    for (unsigned i = 0; i < 48; i++) {
+        appendHex32(output, addr);
+        output += ":";
+        for (unsigned j = 0; j < 4; j++) {
+            output += " ";
+            if (target.memLoad(addr, word)) {
+                appendHex32(output, word);
+            } else {
+                output += "--------";
             }
-            output += "\n";
+            addr += 4;
         }
+        output += "\n";
     }
 
 done:

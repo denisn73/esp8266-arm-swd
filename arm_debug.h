@@ -181,4 +181,7 @@ private:
         uint32_t select;
         uint32_t csw;
     } cache;
+
+    // Relevant bits in cache.select
+    const uint32_t kSelectMask = 0xFF0000F0;
 };

@@ -56,9 +56,6 @@ bool ARMDebug::begin()
     if (!debugPortPowerup())
         return false;
 
-    if (!debugPortReset())
-        return false;
-
     if (!initMemPort())
         return false;
 
@@ -94,6 +91,9 @@ bool ARMDebug::debugPortPowerup()
 
 bool ARMDebug::debugPortReset()
 {
+    // Note: This is an optional feature.
+    // It's implemented on the Cortex-M3 but not the M0+, for example.
+
     const uint32_t powerup = CSYSPWRUPREQ | CDBGPWRUPREQ;
     const uint32_t reset_request = powerup | CDBGRSTREQ;
 
@@ -351,7 +351,7 @@ bool ARMDebug::apRead(unsigned addr, uint32_t &data)
      * Performance for this will be kinda sucky, but so far I don't care.
      */
 
-    unsigned dummyAddr = MEM_IDR;  // Something with no side effects
+    unsigned dummyAddr = (addr & kSelectMask) | MEM_IDR;  // No side effects, same AP and bank
     uint32_t dummyData;
 
     bool result = dpSelect(addr) && dpRead(addr, true, dummyData) &&
@@ -435,7 +435,8 @@ bool ARMDebug::dpSelect(unsigned addr)
      * second nybble of 'addr'. This is cached, so redundant dpSelect()s have no effect.
      */
 
-    uint32_t select = addr & 0xFF0000F0;
+    uint32_t select = addr & kSelectMask;
+
     if (select != cache.select) {
         if (!dpWrite(SELECT, false, select))
             return false;
