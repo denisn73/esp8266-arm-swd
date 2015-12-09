@@ -38,7 +38,7 @@ const int swd_data_pin = 2;
 #include "arm_kinetis_reg.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_TRACE_AP);
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NORMAL);
 
 void appendHex32(String &buffer, uint32_t word)
 {
