@@ -36,15 +36,28 @@ const int swd_data_pin = 2;
 #include "arm_debug.h"
 #include "arm_kinetis_debug.h"
 #include "arm_kinetis_reg.h"
+#include "webapp.h"
 
 ESP8266WebServer server(80);
 ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NORMAL);
 
 void appendHex32(String &buffer, uint32_t word)
 {
+    // Formatting utility for fixed-width hex integers, which don't come easily with just WString
+
     char tmp[10];
     sprintf(tmp, "0x%08X", word);
     buffer += tmp;
+}
+
+uint32_t intArg(const char *name)
+{
+    // Like server.arg(name).toInt(), but it handles integer bases other than 10
+    // with C-style prefixes (0xNUMBER for hex, or 0NUMBER for octal)
+
+    uint8_t tmp[10];
+    server.arg(name).getBytes(tmp, sizeof tmp, 0);
+    return strtol((char*) tmp, 0, 0);
 }
 
 void handleWebRoot()
@@ -52,16 +65,18 @@ void handleWebRoot()
     uint32_t addr = 0x1000;
     uint32_t word, idcode;
 
-    String output = "<html><body><pre>";
+    String output = kWebAppHeader;
 
     output += "Howdy, neighbor!\n";
-    output += "Nice to <a href=\"https://github.com/scanlime/esp8266-arm-swd\">meet you</a>.\n\n";
+    output += "Nice to <a href='https://github.com/scanlime/esp8266-arm-swd'>meet you</a>.\n\n";
 
     if (!target.begin()) {
         output += "Unfortunately,\n";
         output += "I failed to connect to the debug port.\n";
         output += "Check your wiring maybe?\n";
-        goto done;
+        output += kWebAppFooter;
+        server.send(200, "text/html", output);
+        return;
     }
     output += "Connected to the ARM debug port.\n";
 
@@ -71,35 +86,106 @@ void handleWebRoot()
         output += "\n";
     }
 
-    if (target.startup()) {
-        output += "Putting the target into debug-halt, to keep things from getting too crazy just yet.\n";
+    if (target.detect()) {
+        output += "And we have the Kinetis chip-specific extensions, neat:\n";
+        output += " > <a href='#' onclick='targetReset()'>reset</a> <span id='targetResetResult'></span>\n";
+        output += " > <a href='#' onclick='targetHalt()'>halt</a> <span id='targetHaltResult'></span>\n";
     } else {
-        output += "No supported chip-specific interface was detected, alas.\n";
-        goto done;
+        output += "We don't know this chip's specifics, so all you get is memory access.\n";
     }
 
-    output += "\nSome memory...\n\n";
-    for (unsigned i = 0; i < 48; i++) {
-        appendHex32(output, addr);
-        output += ":";
-        for (unsigned j = 0; j < 4; j++) {
-            output += " ";
-            if (target.memLoad(addr, word)) {
-                appendHex32(output, word);
-            } else {
-                output += "--------";
-            }
-            addr += 4;
-        }
-        output += "\n";
-    }
+    output += "\nSome flash memory maybe:\n\n";
+    output += "<script>hexDump(0x00000000, 0x1000);</script>";
 
-done:
-    output += "</pre></body></html>";
+    output += "\nAnd some RAM:\n\n";
+    output += "<script>hexDump(0x20000000, 0x1000);</script>";
+
+    output += kWebAppFooter;
     server.send(200, "text/html", output);
 }
 
-void setup(void)
+void handleMemLoad()
+{
+    // Read 'count' words starting at 'addr', returning a JSON array
+
+    uint32_t addr = intArg("addr");
+    uint32_t count = constrain(intArg("count"), 1, 1024);
+    uint32_t word;
+    String output = "[";
+
+    while (count) {
+        if (target.memLoad(addr, word)) {
+            appendHex32(output,word);
+        } else {
+            output += "null";
+        }
+        addr += 4;
+        count--;
+        if (count) {
+            output += ",";
+        }
+    }
+
+    output += "]\n";
+    server.send(200, "application/json", output);
+}
+
+void handleMemStore()
+{
+    // Interprets the argument list as a list of stores to make in order.
+    // The key in the key=value pair consists of an address with an optional
+    // width prefix ('b' = byte wide, 'h' = half width, default = word)
+    // The address can be a '.' to auto-increment after the previous store.
+    //
+    // Returns some confirmation text, to make it easier to see what happened.
+    // This is intended for interactive use, not really to be machine readable.
+
+    uint32_t addr = -1;
+    String output = "";
+
+    for (int i = 0; server.argName(i).length() > 0; i++) {
+        uint8_t arg[64];
+        server.argName(i).getBytes(arg, sizeof arg, 0);
+        
+        uint8_t *addrString = &arg[arg[0] == 'b' || arg[0] == 'h'];
+        if (addrString[0] != '.') {
+            addr = strtol((char*) addrString, 0, 0);
+        }
+
+        uint8_t valueString[10];
+        server.arg(i).getBytes(valueString, sizeof valueString, 0);
+        uint32_t value = strtol((char*) valueString, 0, 0);
+
+        char result[64];
+        switch (arg[0]) {
+
+            case 'b':
+                value &= 0xff;
+                snprintf(result, sizeof result,
+                    "store byte %02x -> %08x%s\n", 
+                    target.memStoreByte(addr, value) ? "" : " (failed!)");
+                break;
+
+            case 'h':
+                value &= 0xffff;
+                snprintf(result, sizeof result,
+                    "store half %04x -> %08x%s\n", 
+                    target.memStoreHalf(addr, value) ? "" : " (failed!)");
+                break;
+
+            default:
+                snprintf(result, sizeof result,
+                    "store %08x -> %08x%s\n", 
+                    target.memStore(addr, value) ? "" : " (failed!)");
+                break;
+        }
+        output += result;
+    }
+
+    server.send(200, "text/plain", output);
+}
+
+void setup()
 {
     Serial.begin(115200);
     Serial.println("\n\n~ Starting up ~\n");
@@ -114,6 +200,14 @@ void setup(void)
     Serial.println(WiFi.localIP());
 
     server.on("/", handleWebRoot);
+    server.on("/load", handleMemLoad);
+    server.on("/store", handleMemStore);
+
+    server.on("/reset", [](){
+        server.send(200, "application/json", target.reset() ? "true" : "false");});
+    server.on("/halt", [](){
+        server.send(200, "application/json", target.debugHalt() ? "true" : "false");});
+
     server.begin();
 
     MDNS.begin(host);
@@ -122,7 +216,7 @@ void setup(void)
     Serial.printf("Server is running at http://%s.local/\n", host);
 }
 
-void loop(void)
+void loop()
 {
     server.handleClient();
     delay(1);
