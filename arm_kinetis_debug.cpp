@@ -33,7 +33,7 @@ ARMKinetisDebug::ARMKinetisDebug(unsigned clockPin, unsigned dataPin, LogLevel l
 
 bool ARMKinetisDebug::startup()
 {
-    return detect() && reset() && debugHalt() && peripheralInit();
+    return detect() && reset() && debugHalt();
 }
 
 bool ARMKinetisDebug::detect()
@@ -136,7 +136,7 @@ bool ARMKinetisDebug::debugHalt()
     return true;
 }
 
-bool ARMKinetisDebug::peripheralInit()
+bool ARMKinetisDebug::initK20()
 {
     /*
      * ARM peripheral initialization, based on the peripheral startup code
@@ -448,7 +448,7 @@ bool ARMKinetisDebug::FlashProgrammer::begin()
         return false;
 
     // Reset again after mass erase, for new protection bits to take effect
-    if (!(target.reset() && target.debugHalt() && target.peripheralInit()))
+    if (!(target.reset() && target.debugHalt()))
         return false;
 
     // Use FlexRAM as normal RAM, for buffering flash sectors
@@ -503,7 +503,7 @@ bool ARMKinetisDebug::FlashProgrammer::next()
 
         if (++nextSector == numSectors) {
             // Done programming. Another reset! Load new protection flags.
-            if (!(target.reset() && target.debugHalt() && target.peripheralInit()))
+            if (!(target.reset() && target.debugHalt()))
                 return false;
 
             nextSector = 0;

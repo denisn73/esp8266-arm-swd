@@ -37,7 +37,9 @@ public:
     bool detect();              // Detect supported Kinetis hardware
     bool reset();               // System reset
     bool debugHalt();           // Turn on debugging and enter halt state
-    bool peripheralInit();      // Initialize peripherals into default state
+
+    // Even more hardware-specific
+    bool initK20();             // Initialize K20 peripherals into default state
 
     // High-level GPIO interface.
     bool pinMode(unsigned p, int mode);
