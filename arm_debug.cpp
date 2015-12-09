@@ -344,18 +344,18 @@ bool ARMDebug::apRead(unsigned addr, uint32_t &data)
      * See:
      *   http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0314h/ch02s04s03.html
      *
-     * To make this easier to deal with, we issue a real AP read followed by a dummy read.
-     * The first read will give us the previous dummy result, the second read to a dummy
-     * address will give us the data we care about.
-     *
-     * Performance for this will be kinda sucky, but so far I don't care.
+     * Solutions include:
+     *   - Tracking DP reads and their responses asynchronously. Hard but efficient. Not for us.
+     *   - Dummy read, to flush the read through.
+     *   - Better yet, we can do this explicitly with the RDBUFF register in ADI5v1.
      */
 
     unsigned dummyAddr = (addr & kSelectMask) | MEM_IDR;  // No side effects, same AP and bank
     uint32_t dummyData;
 
-    bool result = dpSelect(addr) && dpRead(addr, true, dummyData) &&
-                  dpSelect(dummyAddr) && dpRead(dummyAddr, true, data);
+    bool result = dpSelect(addr) &&                  // Select AP and register bank
+                  dpRead(addr, true, dummyData) &&   // Initiate read, returns dummy data
+                  dpRead(RDBUFF, false, data);       // Explicitly request read results
 
     if (result) {
         log(LOG_TRACE_AP, "AP  Read  [%x] %08x", addr, data);
