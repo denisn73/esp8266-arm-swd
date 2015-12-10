@@ -237,11 +237,15 @@ function refreshTargetMemory()
                         // Got a value! Diff it.
 
                         var textValue = toHex32(value);
-                        if (element.textContent != textValue) {
-                            element.textContent = textValue;
-                            element.className = 'mem-changing';
-                        } else {
+                        var oldValue = element.textContent;
+                        element.textContent = textValue;
+                        
+                        if (oldValue == kStaleMemory) {
+                            element.className = 'mem-okay';
+                        } else if (oldValue == textValue) {
                             element.className = 'mem-stable';
+                        } else {
+                            element.className = 'mem-changing';
                         }
                     }
                 }
