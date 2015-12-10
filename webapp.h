@@ -257,8 +257,10 @@ function updateHexElement(element, updateEvenIfUnchanged)
     // Immediately clean up the value.
     // Note that we revert to saved value on parse error
 
-    var oldValue = parseInt(element.dataset.value, 10) || 0;
-    var value = parseInt(element.textContent, 16) || oldValue;
+    var oldValue = parseInt(element.dataset.value, 10);
+    if (isNaN(oldValue)) oldValue = 0;
+    var value = parseInt(element.textContent, 16);
+    if (isNaN(value)) value = oldValue;
 
     element.textContent = toHex32(value);
     element.dataset.value = value;
