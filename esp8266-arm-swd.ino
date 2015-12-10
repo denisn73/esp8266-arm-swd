@@ -106,7 +106,7 @@ void handleWebRoot()
         output += "We don't know this chip's specifics, so all you get is maybe memory access.\n";
     }
 
-    output += "\nHere's some RAM: (<a href='/ram'>more RAM</a>)\n\n";
+    output += "\nHere's some RAM: (<a href='/ram#mem-20000000'>more RAM</a>)\n\n";
     output += "<script>hexDump(0x1fffff00, 1024 / 4);</script>";
 
     output += "\nMemory mapped GPIOs: (<a href='/mmio'>more memory mapped hardware</a>)\n\n";
@@ -269,7 +269,7 @@ void setup()
     server.on("/", handleWebRoot);
     server.on("/flash", handleWebFlash);
     server.on("/mmio", handleWebMmio);
-    server.on("/ram#mem-20000000", handleWebRam);
+    server.on("/ram", handleWebRam);
 
     server.on("/load", handleMemLoad);
     server.on("/store", handleMemStore);
