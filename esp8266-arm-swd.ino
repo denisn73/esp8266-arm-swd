@@ -106,42 +106,66 @@ void handleWebRoot()
         output += "We don't know this chip's specifics, so all you get is maybe memory access.\n";
     }
 
-    output += "\nHere's some RAM: (<a href='/ram#mem-20000000'>more RAM</a>)\n\n";
+    output += "\nHere's some RAM: (<a href='/mem?addr=0x1fffff00'>more RAM</a>)\n\n";
     output += "<script>hexDump(0x1fffff00, 1024 / 4);</script>";
 
     output += "\nMemory mapped GPIOs: (<a href='/mmio'>more memory mapped hardware</a>)\n\n";
     output += "<script>hexDump(0x400ff000, 16);</script>";
 
-    output += "\nSome flash memory: (<a href='/flash'>more flash</a>)\n\n";
+    output += "\nSome flash memory: (<a href='/mem')>more flash</a>)\n\n";
     output += "<script>hexDump(0x00000000, 1024 / 4);</script>";
 
     output += kWebAppFooter;
     server.send(200, "text/html", output);
 }
 
-void handleWebRam()
+void appendMemLink(String &output, uint32_t addr, uint32_t count, const char *label)
 {
-    String output = kWebAppHeader;
-    if (!webBeginTarget(output)) {
-        return;
-    }
-
-    // Show a full 64k before and after the median at 0x20000000
-    output += "<script>hexDump(0x1fff0000, 128 * 1024 / 4);</script>";
-
-    output += kWebAppFooter;
-    server.send(200, "text/html", output);
+    output += "<a href='/mem?addr=";
+    appendHex32(output, addr);
+    output += "&count=";
+    appendHex32(output, count);
+    output += "'>";
+    output += label;
+    output += "</a>";
 }
 
-void handleWebFlash()
+void handleWebMem()
 {
     String output = kWebAppHeader;
     if (!webBeginTarget(output)) {
         return;
     }
 
-    // Show up to 4MB of flash why not!
-    output += "<script>hexDump(0, 4 * 1024 * 1024 / 4);</script>";
+    uint32_t addr = intArg("addr");
+    uint32_t count = intArg("count");
+    if (count == 0) count = 64 * 1024 / 4;
+
+    // Navigation links at the top and bottom
+    for (int nav = 0;; nav++) {
+
+        appendMemLink(output, addr - count/4, count, "&lt;&lt;page");
+        output += " ";
+        appendMemLink(output, addr - 64*1024/4, count, "&lt;&lt;64k");
+        output += " ";
+        appendMemLink(output, addr - 8*1024/4, count, "&lt;&lt;8k");
+        output += " - ";
+        appendMemLink(output, addr + 8*1024/4, count, "8k>>");
+        output += " ";
+        appendMemLink(output, addr + 64*1024/4, count, "64k>>");
+        output += " ";
+        appendMemLink(output, addr + count/4, count, "page>>");
+        output += "\n\n";
+
+        if (nav > 0) {
+            break;
+        }
+        output += "<script>hexDump(";
+        appendHex32(output, addr);
+        output += ",";
+        appendHex32(output, count);
+        output += ");</script>\n";
+    }
 
     output += kWebAppFooter;
     server.send(200, "text/html", output);
@@ -267,9 +291,8 @@ void setup()
     Serial.println(WiFi.localIP());
 
     server.on("/", handleWebRoot);
-    server.on("/flash", handleWebFlash);
+    server.on("/mem", handleWebMem);
     server.on("/mmio", handleWebMmio);
-    server.on("/ram", handleWebRam);
 
     server.on("/load", handleMemLoad);
     server.on("/store", handleMemStore);
@@ -278,6 +301,9 @@ void setup()
         server.send(200, "application/json", target.reset() ? "true" : "false");});
     server.on("/halt", [](){
         server.send(200, "application/json", target.debugHalt() ? "true" : "false");});
+
+    server.on("/style.css", [](){ server.send(200, "text/css", kWebAppStyle);});
+    server.on("/script.js", [](){ server.send(200, "text/javascript", kWebAppScript);});
 
     server.begin();
 

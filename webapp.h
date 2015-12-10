@@ -3,9 +3,20 @@
 static const char *kWebAppHeader = R"---(<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<style type="text/css">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="all" href="/style.css" />
+    <script src="/script.js" type="text/javascript"></script>
+</head>
+<body onload='refreshTargetMemory()'>
+<pre>)---";
 
+static const char *kWebAppFooter = R"---(
+</pre>
+</body>
+</html>
+)---";
+
+static const char *kWebAppStyle = R"---(
 body
 {
     color: black;
@@ -42,7 +53,7 @@ a:visited
 
 .mem-loading
 {
-    background: #ccc;
+    background: #ddd;
 }
 
 .mem-changing
@@ -55,8 +66,9 @@ a:visited
     background: #fcc;
 }
 
-</style>
-<script>
+)---";
+
+static const char *kWebAppScript = R"---(
 
 function targetAction(url, resultId)
 {
@@ -128,7 +140,7 @@ function hexDump(firstAddress, wordCount)
     for (var count = 0; count < wordCount;) {
         html += toHex32(addr) + ':';
         for (var x = 0; x < numColumns; x++, count++, addr += 4) {
-            html += ' <span class="mem-stale" id="' + memElementId(addr) + '">'
+            html += ' <span contenteditable="true" class="mem-stale" id="' + memElementId(addr) + '">'
                 + kStaleMemory + '</span>';
             asyncMemoryElements.push(addr);
         }
@@ -166,7 +178,7 @@ function refreshTargetMemory()
             return;
         }
 
-        if (isElementInView(element)) {
+        if (!document.hidden && isElementInView(element)) {
 
             // Consider this element for the next async request.
             if (collectElements) {
@@ -268,13 +280,4 @@ function refreshTargetMemory()
     targetMemTimer = setTimeout(refreshTargetMemory, minimumRefreshPeriodMillisec / 2);
 }
 
-</script>
-</head>
-<body onload='refreshTargetMemory()'>
-<pre>)---";
-
-static const char *kWebAppFooter = R"---(
-</pre>
-</body>
-</html>
 )---";
