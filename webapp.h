@@ -109,14 +109,6 @@ function memElementId(addr) {
     return 'mem-' + toHex32(addr);
 }
 
-function isElementInView(element)
-{
-    // We only care about vertical scroll, and we want to know if it's touching at all
-    var rect = element.getBoundingClientRect();
-    var winHeight = window.innerHeight || document.documentElement.clientHeight;
-    return (rect.bottom >= 0 && rect.top <= winHeight);
-}
-
 function hexDump(firstAddress, wordCount)
 {
     // Emit a DOM scaffolding that we'll fill in asynchronously.
@@ -194,7 +186,7 @@ function updateHexElement(element, updateEvenIfUnchanged)
     // Immediately clean up the value.
     // Note that we revert to saved value on parse error
 
-    var oldValue = parseInt(element.dataset.value, 10);
+    var oldValue = parseInt(element.dataset.value, 10) || 0;
     var value = parseInt(element.textContent, 16) || oldValue;
 
     element.textContent = toHex32(value);
@@ -228,6 +220,31 @@ function refreshTargetMemory()
     // If our list of pending updates has run dry, refill it.
     var collectElements = elementUpdatesPending.length == 0;
 
+    var isElementInView;
+    if (document.hidden) {
+        // The whole thing is invisible, for example if the window is minimized.
+        // This shouldn't cause any new requests to go out.
+        isElementInView = function() { return false; }
+
+    } else {
+        // Look up the body's clientrect once per refresh,
+        // and look up each element's rect only once ever.
+        // getBoundingClientRect() is too slow to call each time.
+
+        var bodyTop = document.body.getBoundingClientRect().top;
+        var winHeight = document.documentElement.clientHeight;
+
+        isElementInView = function(element) {
+            if (element.savedTop == undefined) {
+                var rect = element.getBoundingClientRect();
+                element.savedTop = rect.top - bodyTop;
+                element.savedBottom = rect.bottom - bodyTop;
+            }
+            return (element.savedBottom + bodyTop >= 0 &&
+                    element.savedTop + bodyTop <= winHeight);
+        }
+    }
+
     // Each word of target memory in our web page is a span element...
     asyncMemoryElements.forEach( function (addr, index) {
         var element = document.getElementById(memElementId(addr));
@@ -238,7 +255,7 @@ function refreshTargetMemory()
             return;
         }
 
-        if (!document.hidden && isElementInView(element)) {
+        if (isElementInView(element)) {
 
             // Consider this element for the next async request.
             if (collectElements) {
@@ -260,9 +277,10 @@ function refreshTargetMemory()
         elementUpdatesPending.sort(function(a, b) { return a - b; });
 
         // Remove anything that has scrolled out of view, or is being edited
+        var activeElement = document.activeElement;
         elementUpdatesPending = elementUpdatesPending.filter( function( addr ) {
             var el = document.getElementById(memElementId(addr));
-            return isElementInView(el) && el != document.activeElement;
+            return isElementInView(el) && el != activeElement;
         });
 
         var firstAddr = elementUpdatesPending[0];
