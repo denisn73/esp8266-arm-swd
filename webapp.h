@@ -134,9 +134,9 @@ function hexDump(firstAddress, wordCount)
                         contenteditable="true"
                         data-addr="${addr}"
                         class="mem-stale" id="${id}"
-                        onkeypress="hexDump_keyevt(event)"
-                        onkeydown="hexDump_keyevt(event)"
+                        onkeydown="hexDump_keydown(event)"
                         oninput="hexDump_input(event)"
+                        onfocus="hexDump_focus(event)"
                         onblur="hexDump_blur(event)"
                         >${kStaleMemory}</span>`;
             asyncMemoryElements.push(addr);
@@ -147,32 +147,47 @@ function hexDump(firstAddress, wordCount)
     document.write(html);
 }
 
-function hexDump_keyevt(event)
+function hexDump_keydown(event)
 {
-    if (event.which == 13) {
-        // This is enter or shift+enter. Send the value immediately, but don't insert a newline.
-        updateHexElement(event.target);
-        return true;
+    if (event.keyCode == 13) {
+        // This is enter or shift+enter.
+        // Send the value immediately, even if it hasn't changed,
+        // but don't insert a newline.
+
+        event.preventDefault();
+        updateHexElement(event.target, true);
     }
-    return false;
 }
 
 function hexDump_input(event)
 {
     // The editable content has changed. Usually we want to wait until blur.
+
     if (event.target != document.activeElement) {
         updateHexElement(event.target);
     }
-    return false;
+}
+
+function hexDump_focus(event)
+{
+    // Select the whole word by default when entering with the 'tab' key.
+    // See http://stackoverflow.com/questions/3805852/select-all-text-in-contenteditable-div-when-it-focus-click
+
+    requestAnimationFrame(function() {
+        var range = document.createRange();
+        range.selectNodeContents(event.target);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    });
 }
 
 function hexDump_blur(event)
 {
     updateHexElement(event.target);
-    return false;
 }
 
-function updateHexElement(element)
+function updateHexElement(element, updateEvenIfUnchanged)
 {
     var addr = parseInt(element.dataset.addr, 10);
 
@@ -185,7 +200,7 @@ function updateHexElement(element)
     element.textContent = toHex32(value);
     element.dataset.value = value;
 
-    if (value != oldValue) {
+    if (updateEvenIfUnchanged || value != oldValue) {
         element.className = 'mem-pending';
 
         // Fire-and-forget write. The read cycle will act as a confirmation.
