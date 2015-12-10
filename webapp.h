@@ -1,5 +1,8 @@
 #pragma once
 
+// This is not a great web app.
+// Want to help?
+
 static const char *kWebAppHeader = R"---(<!doctype html>
 <html lang="en">
 <head>
@@ -61,6 +64,24 @@ a:visited {
 
 static const char *kWebAppScript = R"---(
 
+function getHashParams()
+{
+    // Parse key-value params from the fragment portion of the URI.
+    // http://stackoverflow.com/a/4198132
+
+    var hashParams = {};
+    var e,
+        a = /\+/g,  // Regex for replacing addition symbol with a space
+        r = /([^&;=]+)=?([^&;]*)/g,
+        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+        q = window.location.hash.substring(1);
+
+    while (e = r.exec(q))
+       hashParams[d(e[1])] = d(e[2]);
+
+    return hashParams;
+}
+
 function targetAction(url, resultId)
 {
     // This is a utility for fire-and-kinda-forget async actions.
@@ -101,9 +122,13 @@ var kBadMemory   = '////////';
 // List of memory addresses we're asynchronously refreshing
 var asyncMemoryElements = [];
 
-// List of addresses still waiting on data in the current refresh cycle
+// List of addresses still waiting on data in the current refresh cycle.
 var elementUpdatesPending = [];
 
+// When we scroll, deleting the pending updates helps us get to the new data faster
+window.addEventListener('scroll', function() {
+    elementUpdatesPending = [];
+});
 
 function memElementId(addr) {
     return 'mem-' + toHex32(addr);
@@ -111,7 +136,7 @@ function memElementId(addr) {
 
 function hexDump(firstAddress, wordCount)
 {
-    // Emit a DOM scaffolding that we'll fill in asynchronously.
+    // Returns an HTML scaffolding that we'll fill in asynchronously.
     // Assumes this is all still inside a <pre> environment.
 
     var html = '';
@@ -135,8 +160,54 @@ function hexDump(firstAddress, wordCount)
         }
         html += '\n';
     }
+    return html;
+}
 
-    document.write(html);
+function hexDumpPager_nav(id, event, addr, count)
+{
+    // Keep the URI fragment updated with current settings in canonical format
+    window.location.hash = `addr=0x${toHex32(addr)}&count=${count}`;
+    document.getElementById(id).innerHTML = hexDumpPager_render(id);
+    event.preventDefault();
+
+    // Kickstart the update loop
+    refreshTargetMemory();
+}
+
+function hexDumpPager_render(containerId)
+{
+    var params = getHashParams();
+    var addr = parseInt(params['addr'], 0) || 0;
+    var count = parseInt(params['count'], 0) || 1024;
+
+    function linkto(addr, count, text)
+    {
+        return `<a href="#" onclick="hexDumpPager_nav('${containerId}', event, ${addr}, ${count})">${text}</a>`;
+    }
+
+    var navbar = (
+        '\n' +
+        linkto(addr - count/4, count, '&lt;--') + ' ' +
+        linkto(addr - 64*1024/4, count, '&lt;&lt;64k') + ' ' +
+        linkto(addr - 8*1024/4, count, '&lt;&lt;8k') + ' ' +
+        linkto(addr - 1*1024/4, count, '&lt;&lt;1k') + ' ' +
+        '--- ' +
+        linkto(addr + 1*1024/4, count, '1k>>') + ' ' +
+        linkto(addr + 8*1024/4, count, '8k>>') + ' ' +
+        linkto(addr + 64*1024/4, count, '64k>>') + ' ' +
+        linkto(addr + count/4, count, '-->') + '\n\n'
+    );
+
+    // Assumes the pager is the only thing we have going on...
+    asyncMemoryElements = [];
+
+    return navbar + hexDump(addr, count) + navbar;
+}
+
+function hexDumpPager(containerId)
+{
+    containerId = containerId || 'hexDumpPager';
+    return `<div id="${containerId}">${hexDumpPager_render(containerId)}</span>`
 }
 
 function hexDump_keydown(event)
