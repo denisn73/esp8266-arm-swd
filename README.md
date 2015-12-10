@@ -16,5 +16,7 @@ Hookups:
 
 | Signal      | SWD Port | SWD over JTAG | ESP8266 pin | Equiv. NodeMCU pin |
 | ----------- | -------- | ------------- | ----------- | ------------------ |
-| Clock       | Pin 4    | TCLK          | GPIO0       | D3                 |
+| 3.3v Power  | Pin 1    |               |             |                    |
 | Data In/Out | Pin 2    | TMS           | GPIO2       | D4                 |
+| Ground      | Pin 3    |               |             |                    |
+| Clock       | Pin 4    | TCLK          | GPIO0       | D3                 |
