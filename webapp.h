@@ -35,9 +35,19 @@ a:visited
     transition: opacity 2s ease;
 }
 
+.mem-stale
+{
+    color: #888;
+}
+
 .mem-loading
 {
     background: #ccc;
+}
+
+.mem-changing
+{
+    font-weight: bold;
 }
 
 .mem-error
@@ -118,7 +128,8 @@ function hexDump(firstAddress, wordCount)
     for (var count = 0; count < wordCount;) {
         html += toHex32(addr) + ':';
         for (var x = 0; x < numColumns; x++, count++, addr += 4) {
-            html += ' <span id="' + memElementId(addr) + '">' + kStaleMemory + '</span>';
+            html += ' <span class="mem-stale" id="' + memElementId(addr) + '">'
+                + kStaleMemory + '</span>';
             asyncMemoryElements.push(addr);
         }
         html += '\n';
@@ -164,7 +175,8 @@ function refreshTargetMemory()
 
         } else {
             // Old and invisible; invalidate the cached contents
-            element.textContent = kStaleMemory;
+
+            element.className = 'mem-stale';
             element.targetMemTimestamp = undefined;
         }
     });
@@ -215,20 +227,34 @@ function refreshTargetMemory()
                 var element = document.getElementById(memElementId(addr));
                 if (element) {
                     element.targetMemTimestamp = newTimestamp;
+
                     if (value == null) {
+                        // Couldn't read this memory
                         element.textContent = kBadMemory;
                         element.className = 'mem-error';
+
                     } else {
-                        element.textContent = toHex32(value);
-                        element.className = 'mem-okay';
+                        // Got a value! Diff it.
+
+                        var textValue = toHex32(value);
+                        if (element.textContent != textValue) {
+                            element.textContent = textValue;
+                            element.className = 'mem-changing';
+                        } else {
+                            element.className = 'mem-stable';
+                        }
                     }
                 }
             });
 
-            // Next request perhaps
+            // Trigger another request maybe. (Decide what to highlight, if anything, before ending this event cycle)
             refreshTargetMemory();
         });
-        req.send();
+
+        // Break the event cycle here; seems to be necessary on webkit
+        setTimeout(function() {
+            req.send()
+        }, 0);
     }
 
     // We try to chain requests when each finishes, but also poll as a retry in case a request is lost.

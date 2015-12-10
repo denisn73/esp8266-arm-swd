@@ -39,7 +39,10 @@ const int swd_data_pin = 2;
 #include "webapp.h"
 
 ESP8266WebServer server(80);
-ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NORMAL);
+
+// Turn the log level back up for debugging; but by default, we have it
+// completely off so that even failures happen quickly, to keep the web app responsive.
+ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NONE);
 
 void appendHex32(String &buffer, uint32_t word)
 {
@@ -60,26 +63,35 @@ uint32_t intArg(const char *name)
     return strtol((char*) tmp, 0, 0);
 }
 
+bool webBeginTarget(String &output)
+{
+    // Make sure we've started the low-level communications, and report errors.
+    // Returns true on success. On error, returns false and sends an error page.
+
+    if (target.begin())
+        return true;
+
+    output += "Unfortunately,\n";
+    output += "I failed to connect to the debug port.\n";
+    output += "Check your wiring maybe?\n";
+    output += kWebAppFooter;
+    server.send(200, "text/html", output);
+    return false;
+}
+
 void handleWebRoot()
 {
-    uint32_t addr = 0x1000;
-    uint32_t word, idcode;
-
     String output = kWebAppHeader;
 
     output += "Howdy, neighbor!\n";
     output += "Nice to <a href='https://github.com/scanlime/esp8266-arm-swd'>meet you</a>.\n\n";
 
-    if (!target.begin()) {
-        output += "Unfortunately,\n";
-        output += "I failed to connect to the debug port.\n";
-        output += "Check your wiring maybe?\n";
-        output += kWebAppFooter;
-        server.send(200, "text/html", output);
+    if (!webBeginTarget(output)) {
         return;
     }
     output += "Connected to the ARM debug port.\n";
 
+    uint32_t idcode;
     if (target.getIDCODE(idcode)) {
         output += "This processor has an IDCODE of ";
         appendHex32(output, idcode);
@@ -94,11 +106,56 @@ void handleWebRoot()
         output += "We don't know this chip's specifics, so all you get is maybe memory access.\n";
     }
 
-    output += "\nSome flash memory maybe:\n\n";
-    output += "<script>hexDump(0x00000000, 0x1000);</script>";
+    output += "\nHere's some RAM: (<a href='/ram'>more RAM</a>)\n\n";
+    output += "<script>hexDump(0x1fffff00, 1024 / 4);</script>";
 
-    output += "\nAnd some RAM:\n\n";
-    output += "<script>hexDump(0x20000000, 0x1000);</script>";
+    output += "\nMemory mapped GPIOs: (<a href='/mmio'>more memory mapped hardware</a>)\n\n";
+    output += "<script>hexDump(0x400ff000, 16);</script>";
+
+    output += "\nSome flash memory: (<a href='/flash'>more flash</a>)\n\n";
+    output += "<script>hexDump(0x00000000, 1024 / 4);</script>";
+
+    output += kWebAppFooter;
+    server.send(200, "text/html", output);
+}
+
+void handleWebRam()
+{
+    String output = kWebAppHeader;
+    if (!webBeginTarget(output)) {
+        return;
+    }
+
+    // Show a full 64k before and after the median at 0x20000000
+    output += "<script>hexDump(0x1fff0000, 128 * 1024 / 4);</script>";
+
+    output += kWebAppFooter;
+    server.send(200, "text/html", output);
+}
+
+void handleWebFlash()
+{
+    String output = kWebAppHeader;
+    if (!webBeginTarget(output)) {
+        return;
+    }
+
+    // Show up to 4MB of flash why not!
+    output += "<script>hexDump(0, 4 * 1024 * 1024 / 4);</script>";
+
+    output += kWebAppFooter;
+    server.send(200, "text/html", output);
+}
+
+void handleWebMmio()
+{
+    String output = kWebAppHeader;
+    if (!webBeginTarget(output)) {
+        return;
+    }
+
+    // Room for improvement!
+    output += "<script>for (var i = 0; i < 256; i++) hexDump(0x40000000 | (i << 12), 64);</script>";
 
     output += kWebAppFooter;
     server.send(200, "text/html", output);
@@ -137,11 +194,10 @@ void handleMemStore()
     // width prefix ('b' = byte wide, 'h' = half width, default = word)
     // The address can be a '.' to auto-increment after the previous store.
     //
-    // Returns some confirmation text, to make it easier to see what happened.
-    // This is intended for interactive use, not really to be machine readable.
+    // Returns a confirmation and result for each store, as JSON.
 
     uint32_t addr = -1;
-    String output = "";
+    String output = "[\n";
 
     for (int i = 0; server.argName(i).length() > 0; i++) {
         uint8_t arg[64];
@@ -156,36 +212,44 @@ void handleMemStore()
         server.arg(i).getBytes(valueString, sizeof valueString, 0);
         uint32_t value = strtol((char*) valueString, 0, 0);
 
-        char result[64];
+        char result[128];
         switch (arg[0]) {
 
             case 'b':
                 value &= 0xff;
                 snprintf(result, sizeof result,
-                    "store byte %02x -> %08x%s\n", 
-                    target.memStoreByte(addr, value) ? "" : " (failed!)");
+                    "{'store': 'byte', 'addr': %d, 'value': %d, 'result': %s}", 
+                    addr, value,
+                    target.memStoreByte(addr, value) ? "true" : "false");
                 addr++;
                 break;
 
             case 'h':
                 value &= 0xffff;
                 snprintf(result, sizeof result,
-                    "store half %04x -> %08x%s\n", 
-                    target.memStoreHalf(addr, value) ? "" : " (failed!)");
+                    "{'store': 'half', 'addr': %d, 'value': %d, 'result': %s}", 
+                    addr, value,
+                    target.memStoreHalf(addr, value) ? "true" : "false");
                 addr += 2;
                 break;
 
             default:
                 snprintf(result, sizeof result,
-                    "store %08x -> %08x%s\n", 
-                    target.memStore(addr, value) ? "" : " (failed!)");
+                    "{'store': 'word', 'addr': %d, 'value': %d, 'result': %s}", 
+                    addr, value,
+                    target.memStore(addr, value) ? "true" : "false");
                 addr += 4;
                 break;
         }
+
+        if (i != 0) {
+            output += ",\n";
+        }
         output += result;
     }
+    output += "\n]";
 
-    server.send(200, "text/plain", output);
+    server.send(200, "application/json", output);
 }
 
 void setup()
@@ -203,6 +267,10 @@ void setup()
     Serial.println(WiFi.localIP());
 
     server.on("/", handleWebRoot);
+    server.on("/flash", handleWebFlash);
+    server.on("/mmio", handleWebMmio);
+    server.on("/ram#mem-20000000", handleWebRam);
+
     server.on("/load", handleMemLoad);
     server.on("/store", handleMemStore);
 
