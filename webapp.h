@@ -17,53 +17,44 @@ static const char *kWebAppFooter = R"---(
 )---";
 
 static const char *kWebAppStyle = R"---(
-body
-{
+
+body {
     color: black;
     background: white;
+    white-space: nowrap;
 }
 
-a:link
-{
+a:link {
     text-decoration: underline;
-    color: #002;
+    color: #003;
+}
+a:visited {
+    color: #003;
 }
 
-a:visited
-{
-    color: #002;
-}
-
-.visible
-{
+.visible {
     opacity: 1;
     transition: opacity 0.1s linear;
 }
-
-.hidden
-{
+.hidden {
     opacity: 0;
     transition: opacity 2s ease;
 }
 
-.mem-stale
-{
+.mem-stale {
     color: #888;
 }
-
-.mem-loading
-{
+.mem-loading {
     background: #ddd;
 }
-
-.mem-changing
-{
+.mem-changing {
     font-weight: bold;
 }
-
-.mem-error
-{
+.mem-error {
     background: #fcc;
+}
+.mem-pending {
+    background: #ff6;
 }
 
 )---";
@@ -100,8 +91,7 @@ function targetAction(url, resultId)
 function targetReset() { targetAction('/reset', 'targetResetResult'); }
 function targetHalt() { targetAction('/halt', 'targetHaltResult'); }
 
-function toHex32(value)
-{
+function toHex32(value) {
     return ('00000000' + value.toString(16)).slice(-8);
 }
 
@@ -115,8 +105,7 @@ var asyncMemoryElements = [];
 var elementUpdatesPending = [];
 
 
-function memElementId(addr)
-{
+function memElementId(addr) {
     return 'mem-' + toHex32(addr);
 }
 
@@ -140,14 +129,70 @@ function hexDump(firstAddress, wordCount)
     for (var count = 0; count < wordCount;) {
         html += toHex32(addr) + ':';
         for (var x = 0; x < numColumns; x++, count++, addr += 4) {
-            html += ' <span contenteditable="true" class="mem-stale" id="' + memElementId(addr) + '">'
-                + kStaleMemory + '</span>';
+            var id = memElementId(addr);
+            html += ` <span 
+                        contenteditable="true"
+                        data-addr="${addr}"
+                        class="mem-stale" id="${id}"
+                        onkeypress="hexDump_keyevt(event)"
+                        onkeydown="hexDump_keyevt(event)"
+                        oninput="hexDump_input(event)"
+                        onblur="hexDump_blur(event)"
+                        >${kStaleMemory}</span>`;
             asyncMemoryElements.push(addr);
         }
         html += '\n';
     }
 
     document.write(html);
+}
+
+function hexDump_keyevt(event)
+{
+    if (event.which == 13) {
+        // This is enter or shift+enter. Send the value immediately, but don't insert a newline.
+        updateHexElement(event.target);
+        return true;
+    }
+    return false;
+}
+
+function hexDump_input(event)
+{
+    // The editable content has changed. Usually we want to wait until blur.
+    if (event.target != document.activeElement) {
+        updateHexElement(event.target);
+    }
+    return false;
+}
+
+function hexDump_blur(event)
+{
+    updateHexElement(event.target);
+    return false;
+}
+
+function updateHexElement(element)
+{
+    var addr = parseInt(element.dataset.addr, 10);
+
+    // Immediately clean up the value.
+    // Note that we revert to saved value on parse error
+
+    var oldValue = parseInt(element.dataset.value, 10);
+    var value = parseInt(element.textContent, 16) || oldValue;
+
+    element.textContent = toHex32(value);
+    element.dataset.value = value;
+
+    if (value != oldValue) {
+        element.className = 'mem-pending';
+
+        // Fire-and-forget write. The read cycle will act as a confirmation.
+        var req = new XMLHttpRequest();
+        req.open('GET', `/store?${addr}=${value}`);
+        req.send();
+    }
 }
 
 var targetMemRequest = null;
@@ -172,7 +217,7 @@ function refreshTargetMemory()
     asyncMemoryElements.forEach( function (addr, index) {
         var element = document.getElementById(memElementId(addr));
 
-        if (Date.now() - element.targetMemTimestamp < minimumRefreshPeriodMillisec) {
+        if (Date.now() - element.dataset.timestamp < minimumRefreshPeriodMillisec) {
             // Our cached timestamp indicates that we've updated this item
             // so recently that we shouldn't do anything with it.
             return;
@@ -189,7 +234,7 @@ function refreshTargetMemory()
             // Old and invisible; invalidate the cached contents
 
             element.className = 'mem-stale';
-            element.targetMemTimestamp = undefined;
+            element.dataset.timestamp = undefined;
         }
     });
 
@@ -199,9 +244,10 @@ function refreshTargetMemory()
         // Keep the array sorted by ascending address
         elementUpdatesPending.sort(function(a, b) { return a - b; });
 
-        // Remove anything that has scrolled out of view
+        // Remove anything that has scrolled out of view, or is being edited
         elementUpdatesPending = elementUpdatesPending.filter( function( addr ) {
-            return isElementInView(document.getElementById(memElementId(addr)));
+            var el = document.getElementById(memElementId(addr));
+            return isElementInView(el) && el != document.activeElement;
         });
 
         var firstAddr = elementUpdatesPending[0];
@@ -227,7 +273,7 @@ function refreshTargetMemory()
 
         var req = new XMLHttpRequest();
         targetMemRequest = req;
-        req.open('GET', '/load?addr=' + firstAddr + '&count=' + wordCount);
+        req.open('GET', `/load?addr=${firstAddr}&count=${wordCount}`);
         req.addEventListener('load', function () {
 
             var newTimestamp = Date.now();
@@ -238,7 +284,8 @@ function refreshTargetMemory()
                 var addr = firstAddr + index * 4;
                 var element = document.getElementById(memElementId(addr));
                 if (element) {
-                    element.targetMemTimestamp = newTimestamp;
+                    element.dataset.timestamp = newTimestamp;
+                    element.dataset.value = value;
 
                     if (value == null) {
                         // Couldn't read this memory

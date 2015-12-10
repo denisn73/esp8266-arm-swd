@@ -4,8 +4,8 @@
 //     for remote control of an ARM microcontroller
 //      via its Serial Wire Debug port.
 //
-//    Designed for the FRDM-KE04Z dev kit as an example target,
-//    with its MKE04Z8VFK4 Cortex M0+ micro.
+//    Tested with the FRDM-KE04Z dev kit (KE04 Cortex M0+)
+//    and the Fadecandy board (K20 Cortex M4)
 //
 ////////////////////////////////////////////////////////////////
 
@@ -99,7 +99,7 @@ void handleWebRoot()
     }
 
     if (target.detect()) {
-        output += "And we have the Kinetis chip-specific extensions, neat:\n";
+        output += "And we have the Kinetis chip-specific extensions, neat.\n\n";
         output += " > <a href='#' onclick='targetReset()'>reset</a> <span id='targetResetResult'></span>\n";
         output += " > <a href='#' onclick='targetHalt()'>debug halt</a> <span id='targetHaltResult'></span>\n";
     } else {
