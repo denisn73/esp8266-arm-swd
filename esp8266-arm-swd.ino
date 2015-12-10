@@ -45,8 +45,8 @@ void appendHex32(String &buffer, uint32_t word)
 {
     // Formatting utility for fixed-width hex integers, which don't come easily with just WString
 
-    char tmp[10];
-    sprintf(tmp, "0x%08X", word);
+    char tmp[16];
+    snprintf(tmp, sizeof tmp, "0x%08X", word);
     buffer += tmp;
 }
 
@@ -55,7 +55,7 @@ uint32_t intArg(const char *name)
     // Like server.arg(name).toInt(), but it handles integer bases other than 10
     // with C-style prefixes (0xNUMBER for hex, or 0NUMBER for octal)
 
-    uint8_t tmp[10];
+    uint8_t tmp[16];
     server.arg(name).getBytes(tmp, sizeof tmp, 0);
     return strtol((char*) tmp, 0, 0);
 }
@@ -89,9 +89,9 @@ void handleWebRoot()
     if (target.detect()) {
         output += "And we have the Kinetis chip-specific extensions, neat:\n";
         output += " > <a href='#' onclick='targetReset()'>reset</a> <span id='targetResetResult'></span>\n";
-        output += " > <a href='#' onclick='targetHalt()'>halt</a> <span id='targetHaltResult'></span>\n";
+        output += " > <a href='#' onclick='targetHalt()'>debug halt</a> <span id='targetHaltResult'></span>\n";
     } else {
-        output += "We don't know this chip's specifics, so all you get is memory access.\n";
+        output += "We don't know this chip's specifics, so all you get is maybe memory access.\n";
     }
 
     output += "\nSome flash memory maybe:\n\n";
@@ -110,12 +110,12 @@ void handleMemLoad()
 
     uint32_t addr = intArg("addr");
     uint32_t count = constrain(intArg("count"), 1, 1024);
-    uint32_t word;
+    uint32_t value;
     String output = "[";
 
     while (count) {
-        if (target.memLoad(addr, word)) {
-            appendHex32(output,word);
+        if (target.memLoad(addr, value)) {
+            output += value;
         } else {
             output += "null";
         }
@@ -164,6 +164,7 @@ void handleMemStore()
                 snprintf(result, sizeof result,
                     "store byte %02x -> %08x%s\n", 
                     target.memStoreByte(addr, value) ? "" : " (failed!)");
+                addr++;
                 break;
 
             case 'h':
@@ -171,12 +172,14 @@ void handleMemStore()
                 snprintf(result, sizeof result,
                     "store half %04x -> %08x%s\n", 
                     target.memStoreHalf(addr, value) ? "" : " (failed!)");
+                addr += 2;
                 break;
 
             default:
                 snprintf(result, sizeof result,
                     "store %08x -> %08x%s\n", 
                     target.memStore(addr, value) ? "" : " (failed!)");
+                addr += 4;
                 break;
         }
         output += result;
