@@ -139,22 +139,26 @@ void handleWebMem()
 
     uint32_t addr = intArg("addr");
     uint32_t count = intArg("count");
-    if (count == 0) count = 64 * 1024 / 4;
+    if (count == 0) count = 4 * 1024 / 4;
 
     // Navigation links at the top and bottom
     for (int nav = 0;; nav++) {
 
-        appendMemLink(output, addr - count/4, count, "&lt;&lt;page");
+        appendMemLink(output, addr - count/4, count, "&lt;--");
         output += " ";
         appendMemLink(output, addr - 64*1024/4, count, "&lt;&lt;64k");
         output += " ";
         appendMemLink(output, addr - 8*1024/4, count, "&lt;&lt;8k");
-        output += " - ";
+        output += " ";
+        appendMemLink(output, addr - 1*1024/4, count, "&lt;&lt;1k");
+        output += " --- ";
+        appendMemLink(output, addr + 1*1024/4, count, "1k>>");
+        output += " ";
         appendMemLink(output, addr + 8*1024/4, count, "8k>>");
         output += " ";
         appendMemLink(output, addr + 64*1024/4, count, "64k>>");
         output += " ";
-        appendMemLink(output, addr + count/4, count, "page>>");
+        appendMemLink(output, addr + count/4, count, "-->");
         output += "\n\n";
 
         if (nav > 0) {
