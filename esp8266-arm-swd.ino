@@ -135,7 +135,7 @@ void handleStore()
 
         char buf[128];
         snprintf(buf, sizeof buf,
-                "%s{store: '%s', addr: %lu, 'value': %lu, 'result': %s}",
+                "%s{\"store\": \"%s\", \"addr\": %lu, \"value\": %lu, \"result\": %s}",
                 i ? "," : "", storeType, addr, value, boolStr(result));
         output += buf;
     }
