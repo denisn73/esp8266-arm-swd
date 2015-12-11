@@ -207,7 +207,7 @@ function updateHexElement(element, updateEvenIfUnchanged)
 
         // Fire-and-forget write. The read cycle will act as a confirmation.
         var req = new XMLHttpRequest();
-        req.open('GET', `/api/store?${addr}=${value}`);
+        req.open('GET', `/api/store?0x${toHex32(addr)}=0x${toHex32(value)}`);
         req.send();
     }
 }
