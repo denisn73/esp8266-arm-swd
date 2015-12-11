@@ -1,9 +1,15 @@
 R""//(
 
 body {
+    font-family: monospace;
     color: black;
     background: white;
     white-space: nowrap;
+    margin: 1em;
+}
+
+p {
+    margin: 1em 0;
 }
 
 a:link {
@@ -14,11 +20,11 @@ a:visited {
     color: #003;
 }
 
-.visible {
+.result-visible {
     opacity: 1;
     transition: opacity 0.1s linear;
 }
-.hidden {
+.result-hidden {
     opacity: 0;
     transition: opacity 2s ease;
 }
@@ -39,5 +45,4 @@ a:visited {
     background: #ff6;
 }
 
-//)"//";
-
+)"//";

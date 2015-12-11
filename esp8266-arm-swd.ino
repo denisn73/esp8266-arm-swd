@@ -42,30 +42,6 @@ ESP8266WebServer server(80);
 // completely off so that even failures happen quickly, to keep the web app responsive.
 ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NONE);
 
-// HTML header fragment used below
-static const char *kWebAppHeader = R"---(<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" media="all" href="/style.css" />
-    <script src="/script.js" type="text/javascript"></script>
-</head>
-<body onload='refreshTargetMemory()'>
-<pre>)---";
-
-// HTML footer fragment matching kWebAppHeader
-static const char *kWebAppFooter = "</pre></body></html>";
-
-
-void appendHex32(String &buffer, uint32_t word)
-{
-    // Formatting utility for fixed-width hex integers, which don't come easily with just WString
-
-    char tmp[16];
-    snprintf(tmp, sizeof tmp, "0x%08X", word);
-    buffer += tmp;
-}
-
 uint32_t intArg(const char *name)
 {
     // Like server.arg(name).toInt(), but it handles integer bases other than 10
@@ -76,93 +52,13 @@ uint32_t intArg(const char *name)
     return strtoul((char*) tmp, 0, 0);
 }
 
-bool webBeginTarget(String &output)
+const char *boolStr(bool x)
 {
-    // Make sure we've started the low-level communications, and report errors.
-    // Returns true on success. On error, returns false and sends an error page.
-
-    if (target.begin())
-        return true;
-
-    output += "Unfortunately,\n";
-    output += "I failed to connect to the debug port.\n";
-    output += "Check your wiring maybe?\n";
-    output += kWebAppFooter;
-    server.send(200, "text/html", output);
-    return false;
+    // JSON compatible
+    return x ? "true" : "false";
 }
 
-void handleWebRoot()
-{
-    String output = kWebAppHeader;
-
-    output += "Howdy, neighbor!\n";
-    output += "Nice to <a href='https://github.com/scanlime/esp8266-arm-swd'>meet you</a>.\n\n";
-
-    if (!webBeginTarget(output)) {
-        return;
-    }
-    output += "Connected to the ARM debug port.\n";
-
-    uint32_t idcode;
-    if (target.getIDCODE(idcode)) {
-        output += "This processor has an IDCODE of ";
-        appendHex32(output, idcode);
-        output += "\n";
-    }
-
-    if (target.detect()) {
-        output += "And we have the Kinetis chip-specific extensions, neat.\n\n";
-        output += " > <a href='#' onclick='targetReset()'>reset</a> <span id='targetResetResult'></span>\n";
-        output += " > <a href='#' onclick='targetHalt()'>debug halt</a> <span id='targetHaltResult'></span>\n";
-    } else {
-        output += "We don't know this chip's specifics, so all you get is maybe memory access.\n";
-    }
-
-    output += "\nHere's some RAM: (<a href='/mem#addr=0x1fffff00'>more RAM</a>)\n\n";
-    output += "<script>document.write(hexDump(0x1fffff00, 1024 / 4));</script>";
-
-    output += "\nMemory mapped GPIOs: (<a href='/mmio'>more memory mapped hardware</a>)\n\n";
-    output += "<script>document.write(hexDump(0x400ff000, 16));</script>";
-
-    output += "\nSome flash memory: (<a href='/mem')>more flash</a>)\n\n";
-    output += "<script>document.write(hexDump(0x00000000, 1024 / 4));</script>";
-
-    output += kWebAppFooter;
-    server.send(200, "text/html", output);
-}
-
-void handleWebMem()
-{
-    String output = kWebAppHeader;
-    if (!webBeginTarget(output)) {
-        return;
-    }
-
-    output += "[<a href='/'>home</a>]\n";
-    output += "<script>document.write(hexDumpPager());</script>\n";
-
-    output += kWebAppFooter;
-    server.send(200, "text/html", output);
-}
-
-void handleWebMmio()
-{
-    String output = kWebAppHeader;
-    if (!webBeginTarget(output)) {
-        return;
-    }
-
-    // Room for improvement!
-
-    output += "[<a href='/'>home</a>]\n";
-    output += "<script>for (var i = 0; i < 256; i++) document.write(hexDump(0x40000000 | (i << 12), 64)); </script>";
-
-    output += kWebAppFooter;
-    server.send(200, "text/html", output);
-}
-
-void handleMemLoad()
+void handleLoad()
 {
     // Read 'count' words starting at 'addr', returning a JSON array
 
@@ -188,7 +84,7 @@ void handleMemLoad()
     server.send(200, "application/json", output);
 }
 
-void handleMemStore()
+void handleStore()
 {
     // Interprets the argument list as a list of stores to make in order.
     // The key in the key=value pair consists of an address with an optional
@@ -203,7 +99,7 @@ void handleMemStore()
     for (int i = 0; server.argName(i).length() > 0; i++) {
         uint8_t arg[64];
         server.argName(i).getBytes(arg, sizeof arg, 0);
-        
+
         uint8_t *addrString = &arg[arg[0] == 'b' || arg[0] == 'h'];
         if (addrString[0] != '.') {
             addr = strtoul((char*) addrString, 0, 0);
@@ -219,26 +115,23 @@ void handleMemStore()
             case 'b':
                 value &= 0xff;
                 snprintf(result, sizeof result,
-                    "{'store': 'byte', 'addr': %d, 'value': %d, 'result': %s}", 
-                    addr, value,
-                    target.memStoreByte(addr, value) ? "true" : "false");
+                    "{'store': 'byte', 'addr': %lu, 'value': %lu, 'result': %s}",
+                    addr, value, boolStr(target.memStoreByte(addr, value)));
                 addr++;
                 break;
 
             case 'h':
                 value &= 0xffff;
                 snprintf(result, sizeof result,
-                    "{'store': 'half', 'addr': %d, 'value': %d, 'result': %s}", 
-                    addr, value,
-                    target.memStoreHalf(addr, value) ? "true" : "false");
+                    "{'store': 'half', 'addr': %lu, 'value': %d, 'result': %s}",
+                    addr, value, boolStr(target.memStoreHalf(addr, value)));
                 addr += 2;
                 break;
 
             default:
                 snprintf(result, sizeof result,
-                    "{'store': 'word', 'addr': %d, 'value': %d, 'result': %s}", 
-                    addr, value,
-                    target.memStore(addr, value) ? "true" : "false");
+                    "{'store': 'word', 'addr': %lu, 'value': %lu, 'result': %s}",
+                    addr, value, boolStr(target.memStore(addr, value)));
                 addr += 4;
                 break;
         }
@@ -253,6 +146,31 @@ void handleMemStore()
     server.send(200, "application/json", output);
 }
 
+void handleBegin()
+{
+    // See if we can communicate. If so, return information about the target.
+    // This shouldn't reset the target, but it does need to communicate,
+    // and the debug port itself will be reset.
+    //
+    // If all is well, this returns some identifying info about the target.
+
+    uint32_t idcode;
+    if (target.begin() && target.getIDCODE(idcode)) {
+        char result[128];
+
+        // Note the room left in the API for future platforms,
+        // even though it requires refactoring a bit.
+
+        snprintf(result, sizeof result,
+            "{'connected': true, 'idcode': %lu, 'platform': %s}",
+            idcode, target.detect() ? "'kinetis'" : "null");
+
+        server.send(200, "application/json", result);
+    } else {
+        server.send(200, "application/json", "{'connected': false}");
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -263,31 +181,44 @@ void setup()
     while (WiFi.waitForConnectResult() != WL_CONNECTED) {
         WiFi.begin(ssid, password);
         Serial.println("Wifi retrying...");
+        delay(200);
     }
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    server.on("/", handleWebRoot);
-    server.on("/mem", handleWebMem);
-    server.on("/mmio", handleWebMmio);
+    server.on("/api/begin", handleBegin);
+    server.on("/api/load", handleLoad);
+    server.on("/api/store", handleStore);
 
-    server.on("/api/load", handleMemLoad);
-    server.on("/api/store", handleMemStore);
     server.on("/api/reset", [](){
-        server.send(200, "application/json", target.reset() ? "true" : "false");});
-    server.on("/api/halt", [](){
-        server.send(200, "application/json", target.debugHalt() ? "true" : "false");});
+        server.send(200, "application/json", boolStr(target.reset()));});
 
-    server.on("/style.css", [](){
-        static const char *data =
-        #include "style.css.h"
-        server.send(200, "text/css", data);
-        });
-    server.on("/script.js", [](){
-        static const char *data =
+    server.on("/api/halt", [](){
+        server.send(200, "application/json", boolStr(target.debugHalt()));});
+
+    server.on("/script.js", [](){ static const char *data =
         #include "script.js.h"
-        server.send(200, "text/javascript", data);
-        });
+        server.send(200, "text/javascript", FPSTR(data)); });
+
+    server.on("/style.css", [](){ static const char *data =
+        #include "style.css.h"
+        server.send(200, "text/css", FPSTR(data)); });
+
+    server.on("/polyfill.js", [](){ static const char *data =
+        #include "polyfill.js.h"
+        server.send(200, "text/javascript", FPSTR(data)); });
+
+    server.on("/", [](){ static const char *data =
+        #include "index.html.h"
+        server.send(200, "text/html", FPSTR(data)); });
+
+    server.on("/mem", [](){ static const char *data =
+        #include "mem.html.h"
+        server.send(200, "text/html", FPSTR(data)); });
+
+    server.on("/mmio", [](){ static const char *data =
+        #include "mmio.html.h"
+        server.send(200, "text/html", FPSTR(data)); });
 
     server.begin();
 
