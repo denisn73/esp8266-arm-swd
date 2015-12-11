@@ -1,4 +1,4 @@
-R"---(// style.css
+R""//(
 
 body {
     color: black;
@@ -39,4 +39,5 @@ a:visited {
     background: #ff6;
 }
 
-)---"; // End of raw string
+//)"//";
+

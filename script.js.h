@@ -1,4 +1,4 @@
-R"---(// script.js
+R""//(
 
 function getHashParams()
 {
@@ -369,4 +369,4 @@ function refreshTargetMemory()
     targetMemTimer = setTimeout(refreshTargetMemory, minimumRefreshPeriodMillisec / 2);
 }
 
-)---"; // End of raw string
+//)"//";
