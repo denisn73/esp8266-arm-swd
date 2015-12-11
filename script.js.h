@@ -155,6 +155,7 @@ function hexDump_keydown(event)
 
         event.preventDefault();
         updateHexElement(event.target, true);
+        hexDump_focus(event);
     }
 }
 
