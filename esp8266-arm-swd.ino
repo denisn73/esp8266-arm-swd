@@ -72,7 +72,7 @@ uint32_t intArg(const char *name)
     // Like server.arg(name).toInt(), but it handles integer bases other than 10
     // with C-style prefixes (0xNUMBER for hex, or 0NUMBER for octal)
 
-    uint8_t tmp[16];
+    uint8_t tmp[64];
     server.arg(name).getBytes(tmp, sizeof tmp, 0);
     return strtol((char*) tmp, 0, 0);
 }
