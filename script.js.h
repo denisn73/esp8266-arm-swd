@@ -83,7 +83,7 @@ function hexDump(firstAddress, wordCount)
         html += toHex32(addr) + ':';
         for (var x = 0; x < numColumns; x++, count++, addr += 4) {
             var id = memElementId(addr);
-            html += ` <span 
+            html += ` <span
                         contenteditable="true"
                         data-addr="${addr}"
                         class="mem-stale" id="${id}"
@@ -340,7 +340,7 @@ function refreshTargetMemory()
                         var textValue = toHex32(value);
                         var oldValue = element.textContent;
                         element.textContent = textValue;
-                        
+
                         if (oldValue == kStaleMemory) {
                             element.className = 'mem-okay';
                         } else if (oldValue == textValue) {
