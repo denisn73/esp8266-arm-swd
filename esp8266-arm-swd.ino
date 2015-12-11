@@ -74,7 +74,7 @@ uint32_t intArg(const char *name)
 
     uint8_t tmp[64];
     server.arg(name).getBytes(tmp, sizeof tmp, 0);
-    return strtol((char*) tmp, 0, 0);
+    return strtoul((char*) tmp, 0, 0);
 }
 
 bool webBeginTarget(String &output)
@@ -207,12 +207,12 @@ void handleMemStore()
         
         uint8_t *addrString = &arg[arg[0] == 'b' || arg[0] == 'h'];
         if (addrString[0] != '.') {
-            addr = strtol((char*) addrString, 0, 0);
+            addr = strtoul((char*) addrString, 0, 0);
         }
 
         uint8_t valueString[64];
         server.arg(i).getBytes(valueString, sizeof valueString, 0);
-        uint32_t value = strtol((char*) valueString, 0, 0);
+        uint32_t value = strtoul((char*) valueString, 0, 0);
 
         char result[128];
         switch (arg[0]) {
