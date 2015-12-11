@@ -10,8 +10,11 @@ R""//(<!doctype html>
 </head>
 <body>
 
-<swd-target-info></swd-target-info>
-<swd-hexedit-pager></swd-hexedit-pager>
+<swd-begin>
+
+	<swd-hexedit-pager></swd-hexedit-pager>
+
+</swd-begin>
 
 </body>
 </html>

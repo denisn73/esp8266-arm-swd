@@ -10,29 +10,31 @@ R""//(<!doctype html>
 </head>
 <body>
 
-<swd-target-info></swd-target-info>
+<swd-begin>
 
-<p>
-	To do: common Cortex-M, ARM, and other registers here
-</p>
+	<p>
+		To do: common Cortex-M, ARM, and other registers here
+	</p>
 
-<swd-hexedit addr="0x40000000" count="32" ></swd-hexedit>
-<swd-hexedit addr="0x40010000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40020000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40030000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40040000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40050000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40060000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40070000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40080000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x40090000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400a0000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400b0000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400c0000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400d0000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400e0000" count="4"  ></swd-hexedit>
-<swd-hexedit addr="0x400f0000" count="16" ></swd-hexedit>
-<swd-hexedit addr="0x400ff000" count="16" ></swd-hexedit>
+	<swd-hexedit addr="0x40000000" count="32" ></swd-hexedit>
+	<swd-hexedit addr="0x40010000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40020000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40030000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40040000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40050000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40060000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40070000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40080000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x40090000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400a0000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400b0000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400c0000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400d0000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400e0000" count="4"  ></swd-hexedit>
+	<swd-hexedit addr="0x400f0000" count="16" ></swd-hexedit>
+	<swd-hexedit addr="0x400ff000" count="16" ></swd-hexedit>
+
+</swd-begin>
 
 </body>
 </html>

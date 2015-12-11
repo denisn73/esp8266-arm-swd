@@ -22,7 +22,6 @@ a:visited {
 
 .result-visible {
     opacity: 1;
-    transition: opacity 0.1s linear;
 }
 .result-hidden {
     opacity: 0;

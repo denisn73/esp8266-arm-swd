@@ -109,37 +109,35 @@ void handleStore()
         server.arg(i).getBytes(valueString, sizeof valueString, 0);
         uint32_t value = strtoul((char*) valueString, 0, 0);
 
-        char result[128];
+        bool result;
+        const char *storeType = "word";
+
         switch (arg[0]) {
+        case 'b':
+            value &= 0xff;
+            storeType = "byte";
+            result = target.memStoreByte(addr, value);
+            addr++;
+            break;
 
-            case 'b':
-                value &= 0xff;
-                snprintf(result, sizeof result,
-                    "{'store': 'byte', 'addr': %lu, 'value': %lu, 'result': %s}",
-                    addr, value, boolStr(target.memStoreByte(addr, value)));
-                addr++;
-                break;
+        case 'h':
+            storeType = "half";
+            value &= 0xffff;
+            result = target.memStoreHalf(addr, value);
+            addr += 2;
+            break;
 
-            case 'h':
-                value &= 0xffff;
-                snprintf(result, sizeof result,
-                    "{'store': 'half', 'addr': %lu, 'value': %d, 'result': %s}",
-                    addr, value, boolStr(target.memStoreHalf(addr, value)));
-                addr += 2;
-                break;
-
-            default:
-                snprintf(result, sizeof result,
-                    "{'store': 'word', 'addr': %lu, 'value': %lu, 'result': %s}",
-                    addr, value, boolStr(target.memStore(addr, value)));
-                addr += 4;
-                break;
+        default:
+            result = target.memStore(addr, value);
+            addr += 4;
+            break;
         }
 
-        if (i != 0) {
-            output += ",\n";
-        }
-        output += result;
+        char buf[128];
+        snprintf(buf, sizeof buf,
+                "%s{store: '%s', addr: %lu, 'value': %lu, 'result': %s}",
+                i ? "," : "", storeType, addr, value, boolStr(result));
+        output += buf;
     }
     output += "\n]";
 
@@ -158,16 +156,16 @@ void handleBegin()
     if (target.begin() && target.getIDCODE(idcode)) {
         char result[128];
 
-        // Note the room left in the API for future platforms,
+        // Note the room left in the API for future platforms detected,
         // even though it requires refactoring a bit.
 
         snprintf(result, sizeof result,
-            "{'connected': true, 'idcode': %lu, 'platform': %s}",
-            idcode, target.detect() ? "'kinetis'" : "null");
+            "{\"connected\": true, \"idcode\": %lu, \"detected\": %s}",
+            idcode, target.detect() ? "\"kinetis\"" : "false");
 
         server.send(200, "application/json", result);
     } else {
-        server.send(200, "application/json", "{'connected': false}");
+        server.send(200, "application/json", "{\"connected\": false}");
     }
 }
 
