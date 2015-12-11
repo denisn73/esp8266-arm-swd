@@ -7,22 +7,34 @@
 // aims to speed up the frontend development by serving the static files
 // directly and proxying other requests to the real server.
 //
+// Dependencies:
+// npm install open
+//
 
 var TARGET_HOST = 'esp8266-swd.local',
     HTTP_PORT = 8266,
-    SKETCH_PATH = '.',
-    TYPES = { js: 'text/javascript', html: 'text/html', css: 'text/css' };
+    SKETCH_PATH = '.';
+
+var TYPES = {
+    js: 'text/javascript',
+    html: 'text/html',
+    css: 'text/css'
+};
 
 var http = require('http'),
     path = require('path'),
     dns = require('dns'),
+    open = require('open'),
     fs = require('fs');
 
 console.log('Resolving target host, ' + TARGET_HOST);
 dns.lookup(TARGET_HOST, function (err, address, family) {
     TARGET_HOST = address; // Cache the DNS lookup
+    console.log('Hi there, ' + TARGET_HOST);
     http.createServer(handleRequest).listen(HTTP_PORT);
-    console.log('http://localhost:' + HTTP_PORT);
+    var url = 'http://localhost:' + HTTP_PORT;
+    console.log(url);
+    open(url);
 });
 
 function localFilePath (url) {
@@ -37,7 +49,9 @@ function unwrapHeader(contents) {
 function handleRequest(req, res) {
     var logInfo = req.method + ' ' + req.url;
     var localPath = localFilePath(req.url);
+
     if (localPath) {
+        // Handled locally
         fs.readFile(localPath, function (err, data) {
             if (err) throw err;
             var type = TYPES[path.extname(req.url).substr(1)] || 'text/plain';
@@ -45,7 +59,9 @@ function handleRequest(req, res) {
             res.end(unwrapHeader(data));
             console.log(logInfo + ' <--file-- ' + localPath + ' (' + type + ')');
         });
+
     } else {
+        // Handled via proxy
         http.get({
             hostname: TARGET_HOST,
             path: req.url,
