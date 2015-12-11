@@ -210,7 +210,7 @@ void handleMemStore()
             addr = strtol((char*) addrString, 0, 0);
         }
 
-        uint8_t valueString[10];
+        uint8_t valueString[64];
         server.arg(i).getBytes(valueString, sizeof valueString, 0);
         uint32_t value = strtol((char*) valueString, 0, 0);
 
