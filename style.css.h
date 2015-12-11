@@ -1,4 +1,4 @@
-R"---(// style.css.h
+R"---(// style.css
 
 body {
     color: black;
