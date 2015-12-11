@@ -1,68 +1,4 @@
-#pragma once
-
-// This is not a great web app.
-// Want to help?
-
-static const char *kWebAppHeader = R"---(<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" media="all" href="/style.css" />
-    <script src="/script.js" type="text/javascript"></script>
-</head>
-<body onload='refreshTargetMemory()'>
-<pre>)---";
-
-static const char *kWebAppFooter = R"---(
-</pre>
-</body>
-</html>
-)---";
-
-static const char *kWebAppStyle = R"---(
-
-body {
-    color: black;
-    background: white;
-    white-space: nowrap;
-}
-
-a:link {
-    text-decoration: underline;
-    color: #003;
-}
-a:visited {
-    color: #003;
-}
-
-.visible {
-    opacity: 1;
-    transition: opacity 0.1s linear;
-}
-.hidden {
-    opacity: 0;
-    transition: opacity 2s ease;
-}
-
-.mem-stale {
-    color: #888;
-}
-.mem-loading {
-    background: #ddd;
-}
-.mem-changing {
-    font-weight: bold;
-}
-.mem-error {
-    background: #fcc;
-}
-.mem-pending {
-    background: #ff6;
-}
-
-)---";
-
-static const char *kWebAppScript = R"---(
+R"---(// script.js
 
 function getHashParams()
 {
@@ -109,8 +45,8 @@ function targetAction(url, resultId)
     req.send();
 }
 
-function targetReset() { targetAction('/reset', 'targetResetResult'); }
-function targetHalt() { targetAction('/halt', 'targetHaltResult'); }
+function targetReset() { targetAction('/api/reset', 'targetResetResult'); }
+function targetHalt() { targetAction('/api/halt', 'targetHaltResult'); }
 
 function toHex32(value) {
     return ('00000000' + value.toString(16)).slice(-8);
@@ -270,7 +206,7 @@ function updateHexElement(element, updateEvenIfUnchanged)
 
         // Fire-and-forget write. The read cycle will act as a confirmation.
         var req = new XMLHttpRequest();
-        req.open('GET', `/store?${addr}=${value}`);
+        req.open('GET', `/api/store?${addr}=${value}`);
         req.send();
     }
 }
@@ -379,7 +315,7 @@ function refreshTargetMemory()
 
         var req = new XMLHttpRequest();
         targetMemRequest = req;
-        req.open('GET', `/load?addr=${firstAddr}&count=${wordCount}`);
+        req.open('GET', `/api/load?addr=${firstAddr}&count=${wordCount}`);
         req.addEventListener('load', function () {
 
             var newTimestamp = Date.now();
@@ -433,4 +369,4 @@ function refreshTargetMemory()
     targetMemTimer = setTimeout(refreshTargetMemory, minimumRefreshPeriodMillisec / 2);
 }
 
-)---";
+)---"; // End of raw string

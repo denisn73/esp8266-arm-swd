@@ -36,13 +36,27 @@ const int swd_data_pin = 2;
 #include "arm_debug.h"
 #include "arm_kinetis_debug.h"
 #include "arm_kinetis_reg.h"
-#include "webapp.h"
 
 ESP8266WebServer server(80);
 
 // Turn the log level back up for debugging; but by default, we have it
 // completely off so that even failures happen quickly, to keep the web app responsive.
 ARMKinetisDebug target(swd_clock_pin, swd_data_pin, ARMDebug::LOG_NONE);
+
+// HTML header fragment used below
+static const char *kWebAppHeader = R"---(<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" media="all" href="/style.css" />
+    <script src="/script.js" type="text/javascript"></script>
+</head>
+<body onload='refreshTargetMemory()'>
+<pre>)---";
+
+// HTML footer fragment matching kWebAppHeader
+static const char *kWebAppFooter = "</pre></body></html>";
+
 
 void appendHex32(String &buffer, uint32_t word)
 {
@@ -254,22 +268,27 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    // User interface
     server.on("/", handleWebRoot);
     server.on("/mem", handleWebMem);
     server.on("/mmio", handleWebMmio);
 
-    // APIs
-    server.on("/load", handleMemLoad);
-    server.on("/store", handleMemStore);
-    server.on("/reset", [](){
+    server.on("/api/load", handleMemLoad);
+    server.on("/api/store", handleMemStore);
+    server.on("/api/reset", [](){
         server.send(200, "application/json", target.reset() ? "true" : "false");});
-    server.on("/halt", [](){
+    server.on("/api/halt", [](){
         server.send(200, "application/json", target.debugHalt() ? "true" : "false");});
 
-    // Little static files
-    server.on("/style.css", [](){ server.send(200, "text/css", kWebAppStyle);});
-    server.on("/script.js", [](){ server.send(200, "text/javascript", kWebAppScript);});
+    server.on("/style.css", [](){
+        static const char *data =
+        #include "style.css.h"
+        server.send(200, "text/css", data);
+        });
+    server.on("/script.js", [](){
+        static const char *data =
+        #include "script.js.h"
+        server.send(200, "text/javascript", data);
+        });
 
     server.begin();
 
