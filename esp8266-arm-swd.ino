@@ -12,10 +12,6 @@
 // Copyright (c) 2015 Micah Elizabeth Scott
 // Released with an MIT-style license; see LICENSE file
 
-// Please edit wifi_config.h to set up your access point. 
-
-#include "wifi_config.h"
-
 // Default pins:
 //    ESP-01          GPIO0 = swdclk, GPIO2 = swdio
 //    NodeMCU devkit  D3 = swdclk, D4 = swdio
@@ -26,6 +22,9 @@
 
 const int swd_clock_pin = 0;
 const int swd_data_pin = 2;
+
+// Edit these in the YOUR-WIFI-CONFIG tab
+extern const char *host, *ssid, *password;
 
 ////////////////////////////////////////////////////////////////
 
