@@ -313,6 +313,14 @@ let RefreshController = (function() {
         req.send();
     }
 
+    var windowLoaded = false;
+    window.addEventListener('load', function () {
+        windowLoaded = true;
+        if (!currentRequest) {
+            beginRequest();
+        }
+    });
+
     return {
         // Start refreshing an <swd-hexword> element
         register: function (element) {
@@ -320,7 +328,7 @@ let RefreshController = (function() {
             cyclePending = null;
             elementSet.add(element);
             element.cache = null;
-            if (!currentRequest) {
+            if (windowLoaded && !currentRequest) {
                 beginRequest();
             }
         },
