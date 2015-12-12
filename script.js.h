@@ -164,6 +164,9 @@ let Hexnav = document.registerElement('swd-hexnav', {
 
 let RefreshController = (function() {
 
+    const maxWordsPerRequest = 32;
+    const minimumUpdateIntervalMillis = 100;
+
     // The Set can quickly keep track of the set of elements
     // without worrying about sorting order, then we lazily create
     // an index sorted by first API URL then ascending address.
@@ -264,18 +267,28 @@ let RefreshController = (function() {
         let api = cyclePending[0].api;
         let firstAddr = cyclePending[0].addr;
         let wordCount = 0;
-        let maxWordCount = 32;   // Keep the requests smallish
 
-        // Look for contiguous addresses on the same API URL, and mark them as loading
+        let now = Date.now();
         for (let el of cyclePending) {
-            if (wordCount < maxWordCount &&
-                el.api == api &&
-                el.addr == firstAddr + wordCount * 4) {
-                wordCount++;
-                el.className = 'mem-loading';
-            } else {
+            if (wordCount >= maxWordsPerRequest) {
+                // Enough words
                 break;
             }
+            if (el.api != api) {
+                // Different API URLs, can't combine
+                break;
+            }
+            if (el.addr != firstAddr + wordCount * 4) {
+                // Addresses stopped being contiguous
+                break;
+            }
+            if (el.renderTimestamp && (now - el.renderTimestamp) < minimumUpdateIntervalMillis) {
+                // This word has already been updated very recently
+                break;
+            }
+            // Ok, mark as loading
+            wordCount++;
+            el.className = 'mem-loading';
         }
 
         // Dequeue from the pending list
@@ -291,8 +304,8 @@ let RefreshController = (function() {
             currentRequest = null;
             beginRequest();
 
-            var response = JSON.parse(req.responseText);
-            for (let i = 0; i < response.length; i++) {
+            let response = JSON.parse(req.responseText);
+            for (let i = 0; i < elements.length; i++) {
                 elements[i].render(response[i]);
             }
         });
@@ -403,6 +416,12 @@ let Hexword = document.registerElement('swd-hexword', {
             // We have some memory or 'null' as an error marker
             let oldTimestamp = this.renderTimestamp;
             this.renderTimestamp = Date.now();
+
+            if (this == document.activeElement) {
+                // Don't change while we're being edited
+                return;
+            }
+
             if (word == null) {
                 this.textContent = '////////';
                 this.className = 'mem-error';
