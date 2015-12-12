@@ -13,10 +13,20 @@ var TARGET_HOST = 'esp8266-swd.local',
     HTTP_PORT = 8266;
 
 var TYPES = {
-    js: 'text/javascript',
-    html: 'text/html',
-    css: 'text/css'
+    html: "text/html",
+    css:  "text/css",
+    js:   "application/javascript",
+    png:  "image/png",
+    gif:  "image/gif",
+    jpg:  "image/jpeg",
+    ico:  "image/x-icon",
+    xml:  "text/xml",
+    pdf:  "application/x-pdf",
+    zip:  "application/x-zip",
+    gz:   "application/x-gzip"
 };
+
+require('string.prototype.endswith');
 
 var http = require('http'),
     path = require('path'),
@@ -39,8 +49,19 @@ dns.lookup(TARGET_HOST, function (err, address, family) {
 });
 
 function localFilePath (url) {
+    // Tries to match the logic in the Arduino sketch
+
     var localPath = DATA_PATH + url;
-    return /^\/\w+\.\w+$/.test(url) && fs.existsSync(localPath) && localPath;
+    if (localPath.endsWith('/')) {
+        localPath += 'index';
+    }
+    if (fs.existsSync(localPath)) {
+        return localPath;
+    }
+    localPath += '.html';
+    if (fs.existsSync(localPath)) {
+        return localPath;
+    }
 }
 
 function handleRequest(req, res) {
@@ -51,7 +72,7 @@ function handleRequest(req, res) {
         // Handled locally
         fs.readFile(localPath, function (err, data) {
             if (err) throw err;
-            var type = TYPES[path.extname(req.url).substr(1)] || 'text/plain';
+            var type = TYPES[path.extname(localPath).substr(1)] || 'text/plain';
             res.writeHead(200, {'Content-Type': type});
             res.end(data);
             console.log(logInfo + ' <--file-- ' + localPath + ' (' + type + ')');
