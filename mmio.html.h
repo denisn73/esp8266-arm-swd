@@ -10,6 +10,10 @@ R""//(<!doctype html>
 </head>
 <body>
 
+<p>
+	[<a href="/">home</a>]
+</p>
+
 <swd-begin>
 
 	<p>
