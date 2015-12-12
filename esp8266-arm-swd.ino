@@ -32,6 +32,8 @@ extern const char *host, *ssid, *password;
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <FS.h>
+
 #include "arm_debug.h"
 #include "arm_kinetis_debug.h"
 #include "arm_kinetis_reg.h"
@@ -169,18 +171,68 @@ void handleBegin()
     }
 }
 
+String getContentType(String filename)
+{
+    if (filename.endsWith(".html")) return "text/html";
+    else if (filename.endsWith(".css")) return "text/css";
+    else if (filename.endsWith(".js"))  return "application/javascript";
+    else if (filename.endsWith(".png")) return "image/png";
+    else if (filename.endsWith(".gif")) return "image/gif";
+    else if (filename.endsWith(".jpg")) return "image/jpeg";
+    else if (filename.endsWith(".ico")) return "image/x-icon";
+    else if (filename.endsWith(".xml")) return "text/xml";
+    else if (filename.endsWith(".pdf")) return "application/x-pdf";
+    else if (filename.endsWith(".zip")) return "application/x-zip";
+    else if (filename.endsWith(".gz"))  return "application/x-gzip";
+    return "text/plain";
+}
+
+bool streamFileIfExists(String path)
+{
+    if (SPIFFS.exists(path)) {
+        String contentType = getContentType(path);
+        File f = SPIFFS.open(path, "r");
+        server.streamFile(f, contentType);
+        f.close();
+        return true;
+    }
+    return false;
+}
+
+void handleStaticFile()
+{
+    String path = server.uri();
+    if (path.endsWith("/")) {
+        path += "index";
+    }
+
+    if (!streamFileIfExists(path) &&
+        !streamFileIfExists(path + ".html")) {
+        server.send(404, "text/plain",
+            "File not found in ESP8266FS flash.\n"
+            "Did you run Tools -> ESP8266 Sketch Data Upload?");
+    }
+}
+
 void setup()
 {
     Serial.begin(115200);
     Serial.println("\n\n~ Starting up ~\n");
 
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.begin(ssid, password);
-    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        WiFi.begin(ssid, password);
-        Serial.println("Wifi retrying...");
-        delay(200);
+    SPIFFS.begin();
+    Dir dir = SPIFFS.openDir("/");
+    while (dir.next()) {    
+        String fileName = dir.fileName();
+        Serial.printf("FS File: %s\n", fileName.c_str());
     }
+    Serial.println();
+
+    do {
+        Serial.println("\nGetting the wifi going...");
+        WiFi.mode(WIFI_AP_STA);
+        WiFi.begin(ssid, password);
+    } while (WiFi.waitForConnectResult() != WL_CONNECTED);
+
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
@@ -194,30 +246,7 @@ void setup()
     server.on("/api/halt", [](){
         server.send(200, "application/json", boolStr(target.debugHalt()));});
 
-    server.on("/script.js", [](){ static const char *data =
-        #include "script.js.h"
-        server.send(200, "text/javascript", FPSTR(data)); });
-
-    server.on("/style.css", [](){ static const char *data =
-        #include "style.css.h"
-        server.send(200, "text/css", FPSTR(data)); });
-
-    server.on("/polyfill.js", [](){ static const char *data =
-        #include "polyfill.js.h"
-        server.send(200, "text/javascript", FPSTR(data)); });
-
-    server.on("/", [](){ static const char *data =
-        #include "index.html.h"
-        server.send(200, "text/html", FPSTR(data)); });
-
-    server.on("/mem", [](){ static const char *data =
-        #include "mem.html.h"
-        server.send(200, "text/html", FPSTR(data)); });
-
-    server.on("/mmio", [](){ static const char *data =
-        #include "mmio.html.h"
-        server.send(200, "text/html", FPSTR(data)); });
-
+    server.onNotFound(handleStaticFile);
     server.begin();
 
     MDNS.begin(host);

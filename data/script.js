@@ -497,11 +497,21 @@ function setHashParam(key, value) {
     // Change one value from the fragment portion of the URI, leaving the others.
 
     let parts = window.location.hash.substring(1).split('&');
+    let newPart = `${key}=${encodeURIComponent(value)}`;
+
     for (let i = 0; i < parts.length; i++) {
         if (parts[i].startsWith(key + '=')) {
-            parts[i] = `${key}=${encodeURIComponent(value)}`;
+            // Replace an existing key
+            parts[i] = newPart;
+            newPart = null;
+            break;
         }
     }
+    if (newPart) {
+        // Append a new key
+        parts.push(newPart);
+    }
+    
     window.location.hash = '#' + parts.join('&');
 }
 
