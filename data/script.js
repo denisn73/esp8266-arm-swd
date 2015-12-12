@@ -1,4 +1,3 @@
-R""//(
 (function(){
 "use strict";
 
@@ -511,4 +510,3 @@ function toHex32(value) {
 }
 
 })();
-)"//";

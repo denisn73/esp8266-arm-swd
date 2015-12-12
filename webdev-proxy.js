@@ -7,13 +7,10 @@
 // aims to speed up the frontend development by serving the static files
 // directly and proxying other requests to the real server.
 //
-// Dependencies:
-// npm install open
-//
 
 var TARGET_HOST = 'esp8266-swd.local',
-    HTTP_PORT = 8266,
-    SKETCH_PATH = '.';
+    DATA_PATH = './data',
+    HTTP_PORT = 8266;
 
 var TYPES = {
     js: 'text/javascript',
@@ -38,12 +35,8 @@ dns.lookup(TARGET_HOST, function (err, address, family) {
 });
 
 function localFilePath (url) {
-    var localPath = SKETCH_PATH + url + '.h';
+    var localPath = DATA_PATH + url;
     return /^\/\w+\.\w+$/.test(url) && fs.existsSync(localPath) && localPath;
-}
-
-function unwrapHeader(contents) {
-    return String(contents).trim().split('\n').slice(1, -1).join('\n');
 }
 
 function handleRequest(req, res) {
@@ -56,7 +49,7 @@ function handleRequest(req, res) {
             if (err) throw err;
             var type = TYPES[path.extname(req.url).substr(1)] || 'text/plain';
             res.writeHead(200, {'Content-Type': type});
-            res.end(unwrapHeader(data));
+            res.end(data);
             console.log(logInfo + ' <--file-- ' + localPath + ' (' + type + ')');
         });
 
