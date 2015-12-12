@@ -47,7 +47,7 @@ Development Proxy
 
 It's slow to update the filesystem, so for development work it's convenient to use a proxy to merge your local static files with the sketch's live API.
 
-A simple tool using Node.js is included:
+A simple tool using Node is included:
 
 ```shell
 npm install
