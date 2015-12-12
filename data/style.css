@@ -3,7 +3,7 @@ body {
     color: black;
     background: white;
     white-space: nowrap;
-    margin: 1em;
+    margin: 1em 1em 3em 1em;
 }
 
 p {
@@ -25,6 +25,15 @@ a:link {
 }
 a:visited {
     color: #003;
+}
+
+ul {
+    list-style: none;
+    padding: 0px;
+}
+ul li:before {
+    content: '*';
+    margin: 0 0.75em;
 }
 
 .visible {

@@ -16,8 +16,17 @@
 
 <table>
 
-	<tr><td>PORT_IOFLT</td><td><swd-hexedit addr="0x40049000" count="1"></swd-hexedit></td><td>Port filter register</td></tr>
-	<tr><td>PORT_PUEL</td><td><swd-hexedit addr="0x40049004" count="1"></swd-hexedit></td><td>Port pullup enable low register</td></tr>
+	<tr><td>SIM_SRSID</td><td><swd-hexedit addr="0x40048000" count="1"></swd-hexedit></td><td>System Reset Status and ID Register</td></tr>
+	<tr><td>SIM_SOPT</td><td><swd-hexedit addr="0x40048004" count="1"></swd-hexedit></td><td>System Options Register</td></tr>
+	<tr><td>SIM_PINSEL</td><td><swd-hexedit addr="0x40048008" count="1"></swd-hexedit></td><td>Pin Selection Register</td></tr>
+	<tr><td>SIM_SCGC</td><td><swd-hexedit addr="0x4004800c" count="1"></swd-hexedit></td><td>System Clock Gating Control Register </td></tr>
+	<tr><td>SIM_UUIDL</td><td><swd-hexedit addr="0x40048010" count="1"></swd-hexedit></td><td>Universally Unique Identifier Low Register</td></tr>
+	<tr><td>SIM_UUIDML</td><td><swd-hexedit addr="0x40048014" count="1"></swd-hexedit></td><td>Universally Unique Identifier Middle Low Register</td></tr>
+	<tr><td>SIM_UUIDMH</td><td><swd-hexedit addr="0x40048018" count="1"></swd-hexedit></td><td>Universally Unique Identifier Middle High Register</td></tr>
+	<tr><td>SIM_CLKDIV</td><td><swd-hexedit addr="0x4004801c" count="1"></swd-hexedit></td><td>Clock Divider Register</td></tr>
+
+	<tr><td>PORT_IOFLT</td><td><swd-hexedit addr="0x40049000" count="1"></swd-hexedit></td><td>Port Filter Register</td></tr>
+	<tr><td>PORT_PUEL</td><td><swd-hexedit addr="0x40049004" count="1"></swd-hexedit></td><td>Port Pullup Enable Low Register</td></tr>
 	<tr><td></td><td><swd-hexedit addr="0x40049008" count="1"></swd-hexedit></td><td></td></tr>
 	<tr><td>PORT_HDRIVE</td><td><swd-hexedit addr="0x4004900c" count="1" ></swd-hexedit></td><td>Port high drive enable register</td></tr>
 
@@ -128,13 +137,13 @@
 	<tr><td>GPIOA_PDDR</td><td><swd-hexedit addr="0x400ff014" count="1" ></swd-hexedit></td><td>Port Data Direction Register</td></tr>
 	<tr><td>GPIOA_PIDR</td><td><swd-hexedit addr="0x400ff018" count="1" ></swd-hexedit></td><td>Port Input Disable Register</td></tr>
 
-	<tr><td>FGPIOA_PDOR</td><td><swd-hexedit addr="0xf8000000" count="1" ></swd-hexedit></td><td>Fast port Data Output Register</td></tr>
-	<tr><td>FGPIOA_PSOR</td><td><swd-hexedit addr="0xf8000004" count="1" ></swd-hexedit></td><td>Fast port Set Output Register</td></tr>
-	<tr><td>FGPIOA_PCOR</td><td><swd-hexedit addr="0xf8000008" count="1" ></swd-hexedit></td><td>Fast port Clear Output Register</td></tr>
-	<tr><td>FGPIOA_PTOR</td><td><swd-hexedit addr="0xf800000c" count="1" ></swd-hexedit></td><td>Fast port Toggle Output Register</td></tr>
-	<tr><td>FGPIOA_PDIR</td><td><swd-hexedit addr="0xf8000010" count="1" ></swd-hexedit></td><td>Fast port Data Input Register</td></tr>
-	<tr><td>FGPIOA_PDDR</td><td><swd-hexedit addr="0xf8000014" count="1" ></swd-hexedit></td><td>Fast port Data Direction Register</td></tr>
-	<tr><td>FGPIOA_PIDR</td><td><swd-hexedit addr="0xf8000018" count="1" ></swd-hexedit></td><td>Fast port Input Disable Register</td></tr>
+	<tr><td>FGPIOA_PDOR</td><td><swd-hexedit addr="0xf8000000" count="1" ></swd-hexedit></td><td>Fast Port Data Output Register</td></tr>
+	<tr><td>FGPIOA_PSOR</td><td><swd-hexedit addr="0xf8000004" count="1" ></swd-hexedit></td><td>Fast Port Set Output Register</td></tr>
+	<tr><td>FGPIOA_PCOR</td><td><swd-hexedit addr="0xf8000008" count="1" ></swd-hexedit></td><td>Fast Port Clear Output Register</td></tr>
+	<tr><td>FGPIOA_PTOR</td><td><swd-hexedit addr="0xf800000c" count="1" ></swd-hexedit></td><td>Fast Port Toggle Output Register</td></tr>
+	<tr><td>FGPIOA_PDIR</td><td><swd-hexedit addr="0xf8000010" count="1" ></swd-hexedit></td><td>Fast Port Data Input Register</td></tr>
+	<tr><td>FGPIOA_PDDR</td><td><swd-hexedit addr="0xf8000014" count="1" ></swd-hexedit></td><td>Fast Port Data Direction Register</td></tr>
+	<tr><td>FGPIOA_PIDR</td><td><swd-hexedit addr="0xf8000018" count="1" ></swd-hexedit></td><td>Fast Port Input Disable Register</td></tr>
 
 </table>
 
@@ -145,10 +154,22 @@
 </p>
 
 <ul>
-	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set the GPIO data direction register</a>, making the LED pins outputs</li>
-	<li><a is="swd-async-action" href="/api/store?0x400ff008=0x00300800">LED on</a></li>
-	<li><a is="swd-async-action" href="/api/store?0x400ff004=0x00300800">LED off</a></li>
+	<li><a is="swd-async-action" href="/api/halt">Halt</a> whatever might be running now (or don't)</li>
+	<li><a is="swd-async-action" href="/api/store?0x40048008=0">Restore default pin options</a> so we can use the GPIO</li>
+	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set pin directions</a> to drive the RGB LED attached</li>
+	<li>Turn the LED
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100800">red</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200800">green</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300000">blue</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200000">cyan</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100000">pink</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00000000">whiteish</a>, or
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300800">off</a></li>
 </ul>
+
+<p>
+	[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
+</p>
 
 </body>
 </html>
