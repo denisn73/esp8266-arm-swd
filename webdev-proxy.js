@@ -26,6 +26,10 @@ var http = require('http'),
 
 console.log('Resolving target host, ' + TARGET_HOST);
 dns.lookup(TARGET_HOST, function (err, address, family) {
+    if (err) {
+        console.log(err);
+        return;
+    }
     TARGET_HOST = address; // Cache the DNS lookup
     console.log('Hi there, ' + TARGET_HOST);
     http.createServer(handleRequest).listen(HTTP_PORT);
