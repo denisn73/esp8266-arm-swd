@@ -14,31 +14,141 @@
 	[<a href="/">home</a>]
 </p>
 
-<swd-begin>
+<table>
 
-	<p>
-		To do: common Cortex-M, ARM, and other registers here
-	</p>
+	<tr><td>PORT_IOFLT</td><td><swd-hexedit addr="0x40049000" count="1"></swd-hexedit></td><td>Port filter register</td></tr>
+	<tr><td>PORT_PUEL</td><td><swd-hexedit addr="0x40049004" count="1"></swd-hexedit></td><td>Port pullup enable low register</td></tr>
+	<tr><td></td><td><swd-hexedit addr="0x40049008" count="1"></swd-hexedit></td><td></td></tr>
+	<tr><td>PORT_HDRIVE</td><td><swd-hexedit addr="0x4004900c" count="1" ></swd-hexedit></td><td>Port high drive enable register</td></tr>
 
-	<swd-hexedit addr="0x40000000" count="32" ></swd-hexedit>
-	<swd-hexedit addr="0x40010000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40020000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40030000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40040000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40050000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40060000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40070000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40080000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x40090000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400a0000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400b0000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400c0000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400d0000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400e0000" count="4"  ></swd-hexedit>
-	<swd-hexedit addr="0x400f0000" count="16" ></swd-hexedit>
-	<swd-hexedit addr="0x400ff000" count="16" ></swd-hexedit>
+	<tr><td>GPIOA_PDOR</td><td><swd-hexedit addr="0x400ff000" count="1" ></swd-hexedit></td><td>Port Data Output Register</td></tr>
+	<tr><td>GPIOA_PSOR</td><td><swd-hexedit addr="0x400ff004" count="1" ></swd-hexedit></td><td>Port Set Output Register<br/>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x80000000">D7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x40000000">D6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x20000000">D5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x10000000">D4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x08000000">D3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x04000000">D2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x02000000">D1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x01000000">D0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00800000">C7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00400000">C6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00200000">C5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00100000">C4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00080000">C3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00040000">C2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00020000">C1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00010000">C0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00008000">B7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00004000">B6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00002000">B5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00001000">B4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000800">B3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000400">B2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000200">B1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000100">B0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000080">A7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000040">A6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000020">A5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000010">A4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000008">A3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000004">A2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000002">A1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000001">A0</a>
+		</td></tr>
+	<tr><td>GPIOA_PCOR</td><td><swd-hexedit addr="0x400ff008" count="1" ></swd-hexedit></td><td>Port Clear Output Register<br/>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x80000000">D7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x40000000">D6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x20000000">D5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x10000000">D4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x08000000">D3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x04000000">D2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x02000000">D1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x01000000">D0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00800000">C7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00400000">C6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00200000">C5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00100000">C4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00080000">C3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00040000">C2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00020000">C1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00010000">C0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00008000">B7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00004000">B6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00002000">B5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00001000">B4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000800">B3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000400">B2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000200">B1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000100">B0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000080">A7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000040">A6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000020">A5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000010">A4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000008">A3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000004">A2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000002">A1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000001">A0</a>
+		</td></tr>
+	<tr><td>GPIOA_PTOR</td><td><swd-hexedit addr="0x400ff00c" count="1" ></swd-hexedit></td><td>Port Toggle Output Register<br/>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x80000000">D7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x40000000">D6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x20000000">D5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x10000000">D4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x08000000">D3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x04000000">D2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x02000000">D1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x01000000">D0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00800000">C7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00400000">C6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00200000">C5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00100000">C4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00080000">C3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00040000">C2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00020000">C1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00010000">C0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00008000">B7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00004000">B6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00002000">B5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00001000">B4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000800">B3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000400">B2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000200">B1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000100">B0</a><br/>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000080">A7</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000040">A6</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000020">A5</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000010">A4</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000008">A3</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000004">A2</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000002">A1</a>
+		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000001">A0</a>
+		</td></tr>
+	<tr><td>GPIOA_PDIR</td><td><swd-hexedit addr="0x400ff010" count="1" ></swd-hexedit></td><td>Port Data Input Register</td></tr>
+	<tr><td>GPIOA_PDDR</td><td><swd-hexedit addr="0x400ff014" count="1" ></swd-hexedit></td><td>Port Data Direction Register</td></tr>
+	<tr><td>GPIOA_PIDR</td><td><swd-hexedit addr="0x400ff018" count="1" ></swd-hexedit></td><td>Port Input Disable Register</td></tr>
 
-</swd-begin>
+	<tr><td>FGPIOA_PDOR</td><td><swd-hexedit addr="0xf8000000" count="1" ></swd-hexedit></td><td>Fast port Data Output Register</td></tr>
+	<tr><td>FGPIOA_PSOR</td><td><swd-hexedit addr="0xf8000004" count="1" ></swd-hexedit></td><td>Fast port Set Output Register</td></tr>
+	<tr><td>FGPIOA_PCOR</td><td><swd-hexedit addr="0xf8000008" count="1" ></swd-hexedit></td><td>Fast port Clear Output Register</td></tr>
+	<tr><td>FGPIOA_PTOR</td><td><swd-hexedit addr="0xf800000c" count="1" ></swd-hexedit></td><td>Fast port Toggle Output Register</td></tr>
+	<tr><td>FGPIOA_PDIR</td><td><swd-hexedit addr="0xf8000010" count="1" ></swd-hexedit></td><td>Fast port Data Input Register</td></tr>
+	<tr><td>FGPIOA_PDDR</td><td><swd-hexedit addr="0xf8000014" count="1" ></swd-hexedit></td><td>Fast port Data Direction Register</td></tr>
+	<tr><td>FGPIOA_PIDR</td><td><swd-hexedit addr="0xf8000018" count="1" ></swd-hexedit></td><td>Fast port Input Disable Register</td></tr>
+
+</table>
+
+<p>
+	Some things to try with the
+	<a href="http://www.digikey.com/product-detail/en/FRDM-KE04Z/FRDM-KE04Z-ND/4765763">FRDM-KE04Z</a>
+	board as a debug target:
+</p>
+
+<ul>
+	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set the GPIO data direction register</a>, making the LED pins outputs</li>
+	<li><a is="swd-async-action" href="/api/store?0x400ff008=0x00300800">LED on</a></li>
+	<li><a is="swd-async-action" href="/api/store?0x400ff004=0x00300800">LED off</a></li>
+</ul>
 
 </body>
 </html>

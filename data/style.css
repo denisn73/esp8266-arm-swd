@@ -10,6 +10,15 @@ p {
     margin: 1em 0;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+td {
+    padding: 0 1.5em 0 0;
+    vertical-align: top;
+}
+
 a:link {
     text-decoration: underline;
     color: #003;
@@ -18,12 +27,21 @@ a:visited {
     color: #003;
 }
 
-.result-visible {
+.visible {
+    visibility: visible;
     opacity: 1;
 }
-.result-hidden {
+.hidden {
     opacity: 0;
-    transition: opacity 2s ease;
+    visibiliy: hidden;
+    transition: visibility 0s, opacity 1s ease;
+}
+
+.result {
+    position: absolute;
+    background: white;
+    padding: 0 1em;
+    pointer-events: none;
 }
 
 .mem-stale {

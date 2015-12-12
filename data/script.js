@@ -60,23 +60,23 @@ let AsyncAction = document.registerElement('swd-async-action', {
 
             this.resultElement = document.createElement('span');
             this.parentNode.insertBefore(this.resultElement, this.nextSibling);
-            this.resultElement.className = 'result-hidden';
+            this.resultElement.className = 'result hidden';
         }},
 
         action: { value: function(json) {
             let el = this;
             let req = new XMLHttpRequest();
 
-            el.resultElement.className = 'result-hidden';
+            el.resultElement.className = 'result hidden';
             el.resultElement.textContent = '';
 
             req.open('GET', this.href);
             req.addEventListener('loadend', function () {
                 let response = JSON.parse(req.responseText);
                 el.resultElement.textContent = response ? ' OK! ' : ' failed ';
-                el.resultElement.className = 'result-visible';
+                el.resultElement.className = 'result visible';
                 setTimeout( function() {
-                    el.resultElement.className = 'result-hidden';
+                    el.resultElement.className = 'result hidden';
                 }, 300);
             });
             req.send();
@@ -123,8 +123,10 @@ let Hexedit = document.registerElement('swd-hexedit', {
                 if (this.headings) {
                     parts.push(toHex32(addr) + ':');
                 }
-                for (let col = 0; col < this.columns; col++, addr += 4, i++) {
+                for (let col = 0; i < this.count && col < this.columns; col++) {
                     parts.push(` <span is="swd-hexword" addr="${addr}" api="${this.api}"></span>`);
+                    addr += 4;
+                    i++;
                 }
                 parts.push('</div>');
             }
