@@ -13,10 +13,14 @@ p {
 table {
     border-collapse: collapse;
 }
-
 td {
     padding: 0 1.5em 0 0;
     vertical-align: top;
+}
+th {
+    font-weight: bold;
+    text-align: left;
+    padding: 1em 0 0 0;
 }
 
 a:link {

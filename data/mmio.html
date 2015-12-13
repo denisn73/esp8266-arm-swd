@@ -14,7 +14,52 @@
 	[<a href="/">home</a>]
 </p>
 
+<p>
+	Some things to try with the
+	<a href="http://www.digikey.com/product-detail/en/FRDM-KE04Z/FRDM-KE04Z-ND/4765763">FRDM-KE04Z</a>
+	board as a debug target:
+</p>
+
+<ul>
+	<li><a is="swd-async-action" href="/api/halt">Halt</a> whatever might be running now (or don't)</li>
+	<li><a is="swd-async-action" href="/api/store?0x40048008=0">Restore default pin options</a> so we can use the GPIO</li>
+	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set pin directions</a> to drive the RGB LED attached</li>
+	<li>Turn the LED
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100800">red</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200800">green</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300000">blue</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200000">cyan</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100000">pink</a>,
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00000000">whiteish</a>, or
+		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300800">off</a></li>
+</ul>
+
+<p>
+	[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
+</p>
+
 <table>
+
+<tr><th>SCS</th><th></th><th>ARMv6M System Control Space</th></tr>
+
+	<tr><td>ACTLR</td><td><swd-hexedit addr="0xe000e008" count="1"></swd-hexedit></td><td>Auxiliary Control Register</td></tr>
+	<tr><td>CPUID</td><td><swd-hexedit addr="0xe000ed00" count="1"></swd-hexedit></td><td>CPUID Base Register</td></tr>
+	<tr><td>ICSR</td><td><swd-hexedit addr="0xe000ed04" count="1"></swd-hexedit></td><td>Interrupt Control State Register</td></tr>
+	<tr><td>VTOR</td><td><swd-hexedit addr="0xe000ed08" count="1"></swd-hexedit></td><td>Vector Table Offset Register</td></tr>
+	<tr><td>AIRCR</td><td><swd-hexedit addr="0xe000ed0c" count="1"></swd-hexedit></td><td>Application Interrupt and Reset Control Register</td></tr>
+	<tr><td>SCR</td><td><swd-hexedit addr="0xe000ed10" count="1"></swd-hexedit></td><td>Optional System Control Register</td></tr>
+	<tr><td>CCR</td><td><swd-hexedit addr="0xe000ed14" count="1"></swd-hexedit></td><td>Configuration and Control Register</td></tr>
+	<tr><td>SHPR2</td><td><swd-hexedit addr="0xe000ed1c" count="1"></swd-hexedit></td><td>System Handler Priority Register 2</td></tr>
+	<tr><td>SHPR3</td><td><swd-hexedit addr="0xe000ed20" count="1"></swd-hexedit></td><td>System Handler Priority Register 3</td></tr>
+	<tr><td>SHCSR</td><td><swd-hexedit addr="0xe000ed24" count="1"></swd-hexedit></td><td>System Handler Control and State Register</td></tr>
+	<tr><td>DFSR</td><td><swd-hexedit addr="0xe000ed30" count="1"></swd-hexedit></td><td>Debug Fault Status Register</td></tr>
+
+	<tr><td>SYST_CSR</td><td><swd-hexedit addr="0xe000e010" count="1"></swd-hexedit></td><td>SysTick Control and Status Register</td></tr>
+	<tr><td>SYST_RVR</td><td><swd-hexedit addr="0xe000e014" count="1"></swd-hexedit></td><td>SysTick Reload Value Register</td></tr>
+	<tr><td>SYST_CVR</td><td><swd-hexedit addr="0xe000e018" count="1"></swd-hexedit></td><td>SysTick Current Value Register</td></tr>
+	<tr><td>SYST_CALIB</td><td><swd-hexedit addr="0xe000e01c" count="1"></swd-hexedit></td><td>SysTick Calibration Value Register</td></tr>
+
+<tr><th>kinetis</th><th></th><th>Freescale Kinetis Series</th></tr>
 
 	<tr><td>SIM_SRSID</td><td><swd-hexedit addr="0x40048000" count="1"></swd-hexedit></td><td>System Reset Status and ID Register</td></tr>
 	<tr><td>SIM_SOPT</td><td><swd-hexedit addr="0x40048004" count="1"></swd-hexedit></td><td>System Options Register</td></tr>
@@ -146,30 +191,6 @@
 	<tr><td>FGPIOA_PIDR</td><td><swd-hexedit addr="0xf8000018" count="1" ></swd-hexedit></td><td>Fast Port Input Disable Register</td></tr>
 
 </table>
-
-<p>
-	Some things to try with the
-	<a href="http://www.digikey.com/product-detail/en/FRDM-KE04Z/FRDM-KE04Z-ND/4765763">FRDM-KE04Z</a>
-	board as a debug target:
-</p>
-
-<ul>
-	<li><a is="swd-async-action" href="/api/halt">Halt</a> whatever might be running now (or don't)</li>
-	<li><a is="swd-async-action" href="/api/store?0x40048008=0">Restore default pin options</a> so we can use the GPIO</li>
-	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set pin directions</a> to drive the RGB LED attached</li>
-	<li>Turn the LED
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100800">red</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200800">green</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300000">blue</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200000">cyan</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100000">pink</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00000000">whiteish</a>, or
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300800">off</a></li>
-</ul>
-
-<p>
-	[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
-</p>
 
 </body>
 </html>
