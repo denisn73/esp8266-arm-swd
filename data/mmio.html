@@ -21,7 +21,6 @@
 </p>
 
 <ul>
-	<li><a is="swd-async-action" href="/api/halt">Halt</a> whatever might be running now (or don't)</li>
 	<li><a is="swd-async-action" href="/api/store?0x40048008=0">Restore default pin options</a> so we can use the GPIO</li>
 	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set pin directions</a> to drive the RGB LED attached</li>
 	<li>Turn the LED
@@ -38,6 +37,11 @@
 	[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
 </p>
 
+<p>
+	&gt; <a is="swd-async-action" href="/api/reset">reset</a><br/>
+	&gt; <a is="swd-async-action" href="/api/halt">debug halt</a>
+</p>
+
 <table>
 
 <tr><th>ARMv6M</th><th></th><th>System Control Block</th></tr>
@@ -52,6 +56,23 @@
 	<tr><td>SHPR3</td><td><swd-hexedit addr="0xe000ed20" count="1"></swd-hexedit></td><td>System Handler Priority Register 3</td></tr>
 	<tr><td>SHCSR</td><td><swd-hexedit addr="0xe000ed24" count="1"></swd-hexedit></td><td>System Handler Control and State Register</td></tr>
 	<tr><td>DFSR</td><td><swd-hexedit addr="0xe000ed30" count="1"></swd-hexedit></td><td>Debug Fault Status Register</td></tr>
+
+<tr><th>ARMv6M</th><th></th><th>Debug Control Block</th></tr>
+	<tr><td>DHCSR</td><td><swd-hexedit addr="0xe000edf0" count="1"></swd-hexedit></td><td>Debug Halting Control And Status Register</td></tr>
+	<tr><td>DCRSR</td><td><swd-hexedit addr="0xe000edf4" count="1"></swd-hexedit></td><td>Debug Core Register Selector Register</td></tr>
+	<tr><td>DCRDR</td><td><swd-hexedit addr="0xe000edf8" count="1"></swd-hexedit></td><td>Debug Core Register Data Register</td></tr>
+	<tr><td>DEMCR</td><td><swd-hexedit addr="0xe000edfc" count="1"></swd-hexedit></td><td>Debug Exception and Monitor Control Register</td></tr>
+
+<tr><th>ARMv6M</th><th></th><th>Data Watchpoint and Trace</th></tr>
+	<tr><td>DWT_CTRL</td><td><swd-hexedit addr="0xe0001000" count="1"></swd-hexedit></td><td>Control register</td></tr>
+	<tr><td>DWT_PCSR</td><td><swd-hexedit addr="0xe000101c" count="1"></swd-hexedit></td><td>Program Counter Sample Register</td></tr>
+	<tr><td>DWT_COMPx</td><td><swd-hexedit addr="0xe0001020" count="1"></swd-hexedit></td><td>Comparator registers</td></tr>
+	<tr><td>DWT_MASKx</td><td><swd-hexedit addr="0xe0001024" count="1"></swd-hexedit></td><td>Comparator Mask registers</td></tr>
+	<tr><td>DWT_FUNCTIONx</td><td><swd-hexedit addr="0xe0001028" count="1"></swd-hexedit></td><td>Comparator Function registers</td></tr>
+
+<tr><th>ARMv6M</th><th></th><th>Breakpoint Unit</th></tr>
+	<tr><td>BP_CTRL</td><td><swd-hexedit addr="0xe0002000" count="1"></swd-hexedit></td><td>Breakpoint Control register</td></tr>
+	<tr><td>BP_COMPx</td><td><swd-hexedit addr="0xe0002008" count="1"></swd-hexedit></td><td>Breakpoint Comparator registers</td></tr>
 
 <tr><th>ARMv6M</th><th></th><th>System Timer</th></tr>
 	<tr><td>SYST_CSR</td><td><swd-hexedit addr="0xe000e010" count="1"></swd-hexedit></td><td>SysTick Control and Status Register</td></tr>
