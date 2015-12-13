@@ -25,10 +25,10 @@ th {
 
 a:link {
     text-decoration: underline;
-    color: #003;
+    color: #153B98;
 }
 a:visited {
-    color: #003;
+    color: #153B98;
 }
 
 ul {
@@ -58,7 +58,7 @@ ul li:before {
 }
 
 .mem-stale {
-    color: #888;
+    color: #D0D0D0;
 }
 .mem-loading {
     background: #ddd;
@@ -67,7 +67,7 @@ ul li:before {
     font-weight: bold;
 }
 .mem-error {
-    background: #fcc;
+    background: #E8ABAB;
 }
 .mem-pending {
     background: #ff6;
