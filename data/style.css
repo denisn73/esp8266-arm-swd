@@ -2,7 +2,6 @@ body {
     font-family: monospace;
     color: black;
     background: white;
-    white-space: nowrap;
     margin: 1em 1em 3em 1em;
 }
 
@@ -33,11 +32,14 @@ a:visited {
 
 ul {
     list-style: none;
-    padding: 0px;
+    padding: 0;
+}
+ul li {
+    padding: 0 0 0 2em;
 }
 ul li:before {
     content: '*';
-    margin: 0 0.75em;
+    margin: 0 0.5em 0 -1em;
 }
 
 .visible {
@@ -61,13 +63,14 @@ ul li:before {
     color: #D0D0D0;
 }
 .mem-loading {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0,0,0, 0.04);
 }
 .mem-changing {
     font-weight: bold;
 }
 .mem-error {
-    color: #E8ABAB;
+    color: rgba(190,0,0, 0.4);
+    font-weight: bold;
 }
 .mem-pending {
     background: #ff6;
