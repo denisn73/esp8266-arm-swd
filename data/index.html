@@ -18,10 +18,19 @@
 <swd-begin result-element="target-info">
 
 	<p id="target-info"></p>
+
+	<ul>
+		<li><a is="swd-async-action" href="/api/reset">reset</a></li>
+		<li><a is="swd-async-action" href="/api/halt">debug halt</a> / 
+	        <a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0005">step</a> /
+	        <a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0001">run</a>
+		</li>
+	</ul>
+
 	<p>
-		&gt; <a is="swd-async-action" href="/api/reset">reset</a><br/>
-		&gt; <a is="swd-async-action" href="/api/halt">debug halt</a>
+		CPU Registers (when halted):
 	</p>
+	<swd-hexedit src="/api/reg" count="21"></swd-hexedit>
 
 	<p>
 		Some RAM, live and editable: (<a href="/mem#count=4096&addr=0x1fffff00">more RAM</a>)

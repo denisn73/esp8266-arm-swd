@@ -56,14 +56,11 @@ uint32_t intArg(const char *name)
 
 const char *boolStr(bool x)
 {
-    // JSON compatible
     return x ? "true" : "false";
 }
 
-void handleLoad()
+void handleMemRead()
 {
-    // Read 'count' words starting at 'addr', returning a JSON array
-
     uint32_t addr = intArg("addr");
     uint32_t count = constrain(intArg("count"), 1, 1024);
     uint32_t value;
@@ -86,7 +83,31 @@ void handleLoad()
     server.send(200, "application/json", output);
 }
 
-void handleStore()
+void handleRegRead()
+{
+    uint32_t addr = intArg("addr");
+    uint32_t count = constrain(intArg("count"), 1, 1024);
+    uint32_t value;
+    String output = "[";
+
+    while (count) {
+        if (target.regRead(addr >> 2, value)) {
+            output += value;
+        } else {
+            output += "null";
+        }
+        addr += 4;
+        count--;
+        if (count) {
+            output += ",";
+        }
+    }
+
+    output += "]\n";
+    server.send(200, "application/json", output);
+}
+
+void handleMemWrite()
 {
     // Interprets the argument list as a list of stores to make in order.
     // The key in the key=value pair consists of an address with an optional
@@ -142,7 +163,31 @@ void handleStore()
         output += buf;
     }
     output += "\n]";
+    server.send(200, "application/json", output);
+}
 
+void handleRegWrite()
+{
+    String output = "[\n";
+
+    for (int i = 0; server.argName(i).length() > 0; i++) {
+        uint8_t addrString[64];
+        server.argName(i).getBytes(addrString, sizeof addrString, 0);
+        uint32_t addr = strtoul((char*) addrString, 0, 0);
+
+        uint8_t valueString[64];
+        server.arg(i).getBytes(valueString, sizeof valueString, 0);
+        uint32_t value = strtoul((char*) valueString, 0, 0);
+
+        bool result = target.regWrite(addr >> 2, value);
+
+        char buf[128];
+        snprintf(buf, sizeof buf,
+                "%s{\"addr\": %lu, \"value\": %lu, \"result\": %s}",
+                i ? "," : "", addr, value, boolStr(result));
+        output += buf;
+    }
+    output += "\n]";
     server.send(200, "application/json", output);
 }
 
@@ -221,7 +266,7 @@ void setup()
 
     SPIFFS.begin();
     Dir dir = SPIFFS.openDir("/");
-    while (dir.next()) {    
+    while (dir.next()) {
         String fileName = dir.fileName();
         Serial.printf("FS File: %s\n", fileName.c_str());
     }
@@ -236,15 +281,18 @@ void setup()
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    server.on("/api/begin", handleBegin);
-    server.on("/api/load", handleLoad);
-    server.on("/api/store", handleStore);
-
     server.on("/api/reset", [](){
         server.send(200, "application/json", boolStr(target.reset()));});
 
     server.on("/api/halt", [](){
         server.send(200, "application/json", boolStr(target.debugHalt()));});
+
+    server.on("/api/begin", handleBegin);
+
+    server.on("/api/mem/read", handleMemRead);
+    server.on("/api/mem/write", handleMemWrite);
+    server.on("/api/reg/read", handleRegRead);
+    server.on("/api/reg/write", handleRegWrite);
 
     server.onNotFound(handleStaticFile);
     server.begin();

@@ -67,7 +67,7 @@ ul li:before {
     font-weight: bold;
 }
 .mem-error {
-    background: #E8ABAB;
+    color: #E8ABAB;
 }
 .mem-pending {
     background: #ff6;

@@ -92,7 +92,7 @@ var Hexedit = document.registerElement('swd-hexedit', {
         createdCallback: { value: function() {
             this.navigation = this.getAttribute('navigation') == 'true';
             this.headings = this.getAttribute('headings') != 'false';
-            this.api = this.getAttribute('api') || '/api';
+            this.src = this.getAttribute('src') || '/api/mem';
             this.addr = parseInt(this.getAttribute('addr'), 0) || 0;
             this.count = parseInt(this.getAttribute('count'), 0) || 1024;
             this.columns = parseInt(this.getAttribute('columns'), 0) || 8;
@@ -124,7 +124,7 @@ var Hexedit = document.registerElement('swd-hexedit', {
                     parts.push(toHex32(addr) + ':');
                 }
                 for (var col = 0; i < this.count && col < this.columns; col++) {
-                    parts.push(` <span is="swd-hexword" addr="${addr}" api="${this.api}"></span>`);
+                    parts.push(` <span is="swd-hexword" addr="${addr}" src="${encodeURI(this.src)}"></span>`);
                     addr += 4;
                     i++;
                 }
@@ -165,12 +165,12 @@ var Hexnav = document.registerElement('swd-hexnav', {
 
 var RefreshController = (function() {
 
-    var maxWordsPerRequest = 32;
+    var maxWordsPerRequest = 64;
     var minimumUpdateIntervalMillis = 100;
 
     // The Set can quickly keep track of the set of elements
     // without worrying about sorting order, then we lazily create
-    // an index sorted by first API URL then ascending address.
+    // an index sorted by source URL first, then by ascending address.
 
     var elementSet = new Set();
     var elementIndex = null;
@@ -178,8 +178,8 @@ var RefreshController = (function() {
     function makeIndex() {
         elementIndex = Array.from(elementSet);
         elementIndex.sort(function (a, b) {
-            if (a.api > b.api) return 1;
-            if (a.api < b.api) return -1;
+            if (a.src > b.src) return 1;
+            if (a.src < b.src) return -1;
             return a.addr - b.addr;
         });
     }
@@ -270,7 +270,7 @@ var RefreshController = (function() {
             return;
         }
 
-        var api = cyclePending[0].api;
+        var src = cyclePending[0].src;
         var firstAddr = cyclePending[0].addr;
         var wordCount = 0;
 
@@ -280,8 +280,8 @@ var RefreshController = (function() {
                 // Enough words
                 break;
             }
-            if (el.api != api) {
-                // Different API URLs, can't combine
+            if (el.src != src) {
+                // Different source URLs, can't combine
                 break;
             }
             if (el.addr != firstAddr + wordCount * 4) {
@@ -303,7 +303,7 @@ var RefreshController = (function() {
 
         var req = new XMLHttpRequest();
         currentRequest = req;
-        var url = `${api}/load?addr=0x${toHex32(firstAddr)}&count=${wordCount}`;
+        var url = `${src}/read?addr=0x${toHex32(firstAddr)}&count=${wordCount}`;
 
         req.open('GET', url);
         req.addEventListener('loadend', function () {
@@ -371,7 +371,7 @@ var Hexword = document.registerElement('swd-hexword', {
         createdCallback: { value: function() {
             this.markStale();
             this.addr = parseInt(this.getAttribute('addr'), 0);
-            this.api = this.getAttribute('api') || '/api';
+            this.src = this.getAttribute('src') || '/api/mem';
             this.contentEditable = true;
             this.savedValue = null;
             this.renderTimestamp = null;
@@ -488,7 +488,7 @@ var Hexword = document.registerElement('swd-hexword', {
                 // periodic read cycle, but we also try to keep the style updated
                 // to indicate confirmed compvarion of the memory store operation.
 
-                var url = `${this.api}/store?0x${toHex32(this.addr)}=0x${toHex32(newValue)}`;
+                var url = `${this.src}/write?0x${toHex32(this.addr)}=0x${toHex32(newValue)}`;
                 var el = this;
                 var req = new XMLHttpRequest();
                 req.open('GET', url);

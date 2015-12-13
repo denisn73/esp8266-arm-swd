@@ -21,26 +21,32 @@
 </p>
 
 <ul>
-	<li><a is="swd-async-action" href="/api/store?0x40048008=0">Restore default pin options</a> so we can use the GPIO</li>
-	<li><a is="swd-async-action" href="/api/store?0x400ff014=0x00300800">Set pin directions</a> to drive the RGB LED attached</li>
 	<li>Turn the LED
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100800">red</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200800">green</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300000">blue</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00200000">cyan</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00100000">pink</a>,
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00000000">whiteish</a>, or
-		<a is="swd-async-action" href="/api/store?0x400ff000=0x00300800">off</a></li>
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00100800">red</a>,
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00200800">green</a>,
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00300000">blue</a>,
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00200000">cyan</a>,
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00100000">pink</a>,
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00000000">whiteish</a>, or
+		<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00300800">off</a></li>
 </ul>
 
 <p>
 	[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
 </p>
 
+<ul>
+	<li><a is="swd-async-action" href="/api/reset">reset</a></li>
+	<li><a is="swd-async-action" href="/api/halt">debug halt</a> / 
+        <a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0005">step</a> /
+        <a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0001">run</a>
+	</li>
+</ul>
+
 <p>
-	&gt; <a is="swd-async-action" href="/api/reset">reset</a><br/>
-	&gt; <a is="swd-async-action" href="/api/halt">debug halt</a>
+	CPU Registers (when halted):
 </p>
+<swd-hexedit src="/api/reg" count="21"></swd-hexedit>
 
 <table>
 
@@ -114,38 +120,38 @@
 	<tr><td>GPIOA_PSOR</td><td><swd-hexedit addr="0x400ff004" count="1" ></swd-hexedit></td><td>Port Set Output Register<br/></td>
 	<tr><td>GPIOA_PCOR</td><td><swd-hexedit addr="0x400ff008" count="1" ></swd-hexedit></td><td>Port Clear Output Register<br/></td>
 	<tr><td>GPIOA_PTOR</td><td><swd-hexedit addr="0x400ff00c" count="1" ></swd-hexedit></td><td>Port Toggle Output Register<br/>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x80000000">D7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x40000000">D6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x20000000">D5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x10000000">D4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x08000000">D3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x04000000">D2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x02000000">D1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x01000000">D0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00800000">C7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00400000">C6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00200000">C5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00100000">C4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00080000">C3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00040000">C2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00020000">C1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00010000">C0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00008000">B7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00004000">B6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00002000">B5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00001000">B4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000800">B3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000400">B2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000200">B1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000100">B0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000080">A7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000040">A6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000020">A5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000010">A4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000008">A3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000004">A2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000002">A1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff00c=0x00000001">A0</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x80000000">D7</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x40000000">D6</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x20000000">D5</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x10000000">D4</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x08000000">D3</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x04000000">D2</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x02000000">D1</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x01000000">D0</a><br/>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00800000">C7</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00400000">C6</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00200000">C5</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00100000">C4</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00080000">C3</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00040000">C2</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00020000">C1</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00010000">C0</a><br/>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00008000">B7</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00004000">B6</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00002000">B5</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00001000">B4</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000800">B3</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000400">B2</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000200">B1</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000100">B0</a><br/>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000080">A7</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000040">A6</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000020">A5</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000010">A4</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000008">A3</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000004">A2</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000002">A1</a>
+		<a is="swd-async-action" href="/api/mem/write?0x400ff00c=0x00000001">A0</a>
 		</td></tr>
 	<tr><td>GPIOA_PDIR</td><td><swd-hexedit addr="0x400ff010" count="1" ></swd-hexedit></td><td>Port Data Input Register</td></tr>
 	<tr><td>GPIOA_PDDR</td><td><swd-hexedit addr="0x400ff014" count="1" ></swd-hexedit></td><td>Port Data Direction Register</td></tr>

@@ -53,6 +53,13 @@ public:
      */
     bool begin();
 
+    // Turn on debugging and enter halt state
+    bool debugHalt();
+
+    // CPU register operations, when halted (via DCRSR)
+    bool regWrite(unsigned num, uint32_t data);
+    bool regRead(unsigned num, uint32_t &data);
+
     // Memory operations (AHB bus)
     bool memStore(uint32_t addr, uint32_t data);
     bool memStore(uint32_t addr, const uint32_t *data, unsigned count);
@@ -101,6 +108,9 @@ public:
     // Packet assembly tools
     uint8_t packHeader(unsigned addr, bool APnDP, bool RnW);
     bool evenParity(uint32_t word);
+
+    // Debug core register handshaking
+    bool regTransactionHandshake();
 
     // Debug port layer
     bool dpWrite(unsigned addr, bool APnDP, uint32_t data);

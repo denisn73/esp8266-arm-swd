@@ -1,18 +1,18 @@
 /*
  * Simple ARM debug interface for Arduino, using the SWD (Serial Wire Debug) port.
- * 
+ *
  * Copyright (c) 2013 Micah Elizabeth Scott
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
  * the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
@@ -24,6 +24,8 @@
 #include <Arduino.h>
 #include <stdarg.h>
 #include "arm_debug.h"
+
+#include "arm_kinetis_reg.h"  // Actually we just want ARM
 
 
 ARMDebug::ARMDebug(unsigned clockPin, unsigned dataPin, LogLevel logLevel)
@@ -132,6 +134,80 @@ bool ARMDebug::initMemPort()
     return true;
 }
 
+bool ARMDebug::debugHalt()
+{
+    /*
+     * Enable debug, request a halt, and read back status.
+     *
+     * This part is somewhat timing critical, since we're racing against the watchdog
+     * timer. Avoid memWait() by calling the lower-level interface directly.
+     *
+     * Since this is expected to fail a bunch before succeeding, mute errors temporarily.
+     */
+
+    unsigned haltRetries = 10000;
+    LogLevel savedLogLevel;
+    uint32_t dhcsr;
+
+    // Point at the debug halt control/status register. We disable MEM-AP autoincrement,
+    // and leave TAR pointed at DHCSR for the entire loop.
+    if (memWriteCSW(CSW_32BIT) && apWrite(MEM_TAR, REG_SCB_DHCSR)) {
+
+        setLogLevel(LOG_NONE, savedLogLevel);
+
+        while (haltRetries) {
+            haltRetries--;
+
+            if (!apWrite(MEM_DRW, 0xA05F0003))
+                continue;
+            if (!apRead(MEM_DRW, dhcsr))
+                continue;
+
+            if (dhcsr & (1 << 17)) {
+                // Halted!
+                break;
+            }
+        }
+
+        setLogLevel(savedLogLevel);
+    }
+
+    if (!haltRetries) {
+        log(LOG_ERROR, "ARMDebug: Failed to put CPU in debug halt state. (DHCSR: %08x)", dhcsr);
+        return false;
+    }
+
+    return true;
+}
+
+bool ARMDebug::regTransactionHandshake()
+{
+    const uint32_t S_REGRDY = 1<<16;
+    uint32_t dhcsr;
+    if (!memLoad(REG_SCB_DHCSR, dhcsr)) {
+        // Lower-level communications error
+        return false;
+    }
+    return (dhcsr & S_REGRDY) != 0;
+}
+
+bool ARMDebug::regWrite(unsigned num, uint32_t data)
+{
+    const uint32_t write = 0x10000;
+    num &= 0xFFFF;
+    return memStore(REG_SCB_DCRDR, data)
+        && memStore(REG_SCB_DCRSR, num | write)
+        && regTransactionHandshake();
+}
+
+bool ARMDebug::regRead(unsigned num, uint32_t& data)
+{
+    num &= 0xFFFF;
+    return memStore(REG_SCB_DCRSR, num)
+        && regTransactionHandshake()
+        && memLoad(REG_SCB_DCRDR, data);
+}
+
 bool ARMDebug::memWriteCSW(uint32_t data)
 {
     // Write to the MEM-AP CSW. Duplicate writes are ignored, and the cache is updated.
@@ -203,7 +279,7 @@ bool ARMDebug::memStoreAndVerify(uint32_t addr, const uint32_t *data, unsigned c
         count--;
     }
 
-    return true;    
+    return true;
 }
 
 bool ARMDebug::memStore(uint32_t addr, const uint32_t *data, unsigned count)
@@ -508,7 +584,7 @@ bool ARMDebug::dpRead(unsigned addr, bool APnDP, uint32_t &data)
                     wireWriteTurnaround();
                     wireWriteIdle();
                     log(LOG_ERROR, "PARITY ERROR during read (addr=%x APnDP=%d data=%08x)",
-                        addr, APnDP, data);         
+                        addr, APnDP, data);
                     return false;
                 }
                 wireWriteTurnaround();
@@ -654,7 +730,7 @@ uint32_t ARMDebug::wireRead(unsigned nBits)
         mask <<= 1;
         digitalWrite(clockPin, HIGH);
     }
- 
+
     log(LOG_TRACE_SWD, "SWD Read  %08x (%d)", result, nBits);
     return result;
 }

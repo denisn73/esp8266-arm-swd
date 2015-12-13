@@ -1,6 +1,6 @@
 /*
  * Register definitions for remote debugging on the Freescale Kinetis chips.
- * Originally from:
+ * Based on definitions from:
  *
  * Teensyduino Core Library
  * http://www.pjrc.com/teensy/
@@ -14,10 +14,10 @@
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
  *
- * 1. The above copyright notice and this permission notice shall be 
+ * 1. The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
  *
- * 2. If the Software is incorporated into a build system that allows 
+ * 2. If the Software is incorporated into a build system that allows
  * selection among a list of target devices, then similar target
  * devices manufactured by PJRC.COM must be included in the list of
  * target devices and selectable in the same manner.
@@ -33,6 +33,7 @@
  */
 
 #pragma once
+#include "arm_reg.h"
 
 // chapter 11: Port control and interrupts (PORT)
 #define REG_PORTA_PCR0              0x40049000            // Pin Control Register n
@@ -227,7 +228,7 @@
 #define REG_SIM_SOPT1               0x40047000        // System Options Register 1
 #define REG_SIM_SOPT1CFG            0x40047004        // SOPT1 Configuration Register
 #define REG_SIM_SOPT2               0x40048004        // System Options Register 2
-#define REG_SIM_SOPT2_USBSRC        0x00040000        // 0=USB_CLKIN, 1=FFL/PLL 
+#define REG_SIM_SOPT2_USBSRC        0x00040000        // 0=USB_CLKIN, 1=FFL/PLL
 #define REG_SIM_SOPT2_PLLFLLSEL     0x00010000        // 0=FLL, 1=PLL
 #define REG_SIM_SOPT2_TRACECLKSEL   0x00001000        // 0=MCGOUTCLK, 1=CPU
 #define REG_SIM_SOPT2_PTD7PAD       0x00000800        // 0=normal, 1=double drive PTD7
@@ -346,10 +347,10 @@
 #define REG_MCG_C2                  0x40064001          // MCG Control 2 Register
 #define REG_MCG_C2_IRCS             0x01                // Internal Reference Clock Select, Selects between the fast or slow internal reference clock source.
 #define REG_MCG_C2_LP               0x02                // Low Power Select, Controls whether the FLL or PLL is disabled in BLPI and BLPE modes.
-#define REG_MCG_C2_EREFS            0x04                // External Reference Select, Selects the source for the external reference clock. 
+#define REG_MCG_C2_EREFS            0x04                // External Reference Select, Selects the source for the external reference clock.
 #define REG_MCG_C2_HGO0             0x08                // High Gain Oscillator Select, Controls the crystal oscillator mode of operation
 #define REG_MCG_C2_RANGE0(n)        (((n) & 0x03) << 4) // Frequency Range Select, Selects the frequency range for the crystal oscillator
-#define REG_MCG_C2_LOCRE0           0x80                // Loss of Clock Reset Enable, Determines whether an interrupt or a reset request is made following a loss of OSC0 
+#define REG_MCG_C2_LOCRE0           0x80                // Loss of Clock Reset Enable, Determines whether an interrupt or a reset request is made following a loss of OSC0
 #define REG_MCG_C3                  0x40064002          // MCG Control 3 Register
 #define REG_MCG_C3_SCTRIM(n)        (n)                 // Slow Internal Reference Clock Trim Setting
 #define REG_MCG_C4                  0x40064003          // MCG Control 4 Register
@@ -364,7 +365,7 @@
 #define REG_MCG_C6                  0x40064005          // MCG Control 6 Register
 #define REG_MCG_C6_VDIV0(n)         ((n) & 0x1F)        // VCO 0 Divider
 #define REG_MCG_C6_CME0             0x20                // Clock Monitor Enable
-#define REG_MCG_C6_PLLS             0x40                // PLL Select, Controls whether the PLL or FLL output is selected as the MCG source when CLKS[1:0]=00. 
+#define REG_MCG_C6_PLLS             0x40                // PLL Select, Controls whether the PLL or FLL output is selected as the MCG source when CLKS[1:0]=00.
 #define REG_MCG_C6_LOLIE0           0x80                // Loss of Lock Interrrupt Enable
 #define REG_MCG_S                   0x40064006          // MCG Status Register
 #define REG_MCG_S_IRCST             0x01                // Internal Reference Clock Status
@@ -533,71 +534,71 @@
 #define REG_USB_OTGISTAT_B_SESS_CHG     (uint8_t)0x04           //
 #define REG_USB_OTGISTAT_AVBUSCHG       (uint8_t)0x01           //
 #define REG_USB0_OTGICR                 0x40072014 // OTG Interrupt Control Register
-#define REG_USB_OTGICR_IDEN             (uint8_t)0x80           // 
-#define REG_USB_OTGICR_ONEMSECEN        (uint8_t)0x40           // 
-#define REG_USB_OTGICR_LINESTATEEN      (uint8_t)0x20           // 
-#define REG_USB_OTGICR_SESSVLDEN        (uint8_t)0x08           // 
-#define REG_USB_OTGICR_BSESSEN          (uint8_t)0x04           // 
-#define REG_USB_OTGICR_AVBUSEN          (uint8_t)0x01           // 
+#define REG_USB_OTGICR_IDEN             (uint8_t)0x80           //
+#define REG_USB_OTGICR_ONEMSECEN        (uint8_t)0x40           //
+#define REG_USB_OTGICR_LINESTATEEN      (uint8_t)0x20           //
+#define REG_USB_OTGICR_SESSVLDEN        (uint8_t)0x08           //
+#define REG_USB_OTGICR_BSESSEN          (uint8_t)0x04           //
+#define REG_USB_OTGICR_AVBUSEN          (uint8_t)0x01           //
 #define REG_USB0_OTGSTAT                0x40072018 // OTG Status register
-#define REG_USB_OTGSTAT_ID              (uint8_t)0x80           // 
-#define REG_USB_OTGSTAT_ONEMSECEN       (uint8_t)0x40           // 
-#define REG_USB_OTGSTAT_LINESTATESTABLE (uint8_t)0x20           // 
-#define REG_USB_OTGSTAT_SESS_VLD        (uint8_t)0x08           // 
-#define REG_USB_OTGSTAT_BSESSEND        (uint8_t)0x04           // 
-#define REG_USB_OTGSTAT_AVBUSVLD        (uint8_t)0x01           // 
+#define REG_USB_OTGSTAT_ID              (uint8_t)0x80           //
+#define REG_USB_OTGSTAT_ONEMSECEN       (uint8_t)0x40           //
+#define REG_USB_OTGSTAT_LINESTATESTABLE (uint8_t)0x20           //
+#define REG_USB_OTGSTAT_SESS_VLD        (uint8_t)0x08           //
+#define REG_USB_OTGSTAT_BSESSEND        (uint8_t)0x04           //
+#define REG_USB_OTGSTAT_AVBUSVLD        (uint8_t)0x01           //
 #define REG_USB0_OTGCTL                 0x4007201C // OTG Control Register
-#define REG_USB_OTGCTL_DPHIGH           (uint8_t)0x80           // 
-#define REG_USB_OTGCTL_DPLOW            (uint8_t)0x20           // 
-#define REG_USB_OTGCTL_DMLOW            (uint8_t)0x10           // 
-#define REG_USB_OTGCTL_OTGEN            (uint8_t)0x04           // 
+#define REG_USB_OTGCTL_DPHIGH           (uint8_t)0x80           //
+#define REG_USB_OTGCTL_DPLOW            (uint8_t)0x20           //
+#define REG_USB_OTGCTL_DMLOW            (uint8_t)0x10           //
+#define REG_USB_OTGCTL_OTGEN            (uint8_t)0x04           //
 #define REG_USB0_ISTAT                  0x40072080 // Interrupt Status Register
-#define REG_USB_ISTAT_STALL             (uint8_t)0x80           // 
-#define REG_USB_ISTAT_ATTACH            (uint8_t)0x40           // 
-#define REG_USB_ISTAT_RESUME            (uint8_t)0x20           // 
-#define REG_USB_ISTAT_SLEEP             (uint8_t)0x10           // 
-#define REG_USB_ISTAT_TOKDNE            (uint8_t)0x08           // 
-#define REG_USB_ISTAT_SOFTOK            (uint8_t)0x04           // 
-#define REG_USB_ISTAT_ERROR             (uint8_t)0x02           // 
-#define REG_USB_ISTAT_USBRST            (uint8_t)0x01           // 
+#define REG_USB_ISTAT_STALL             (uint8_t)0x80           //
+#define REG_USB_ISTAT_ATTACH            (uint8_t)0x40           //
+#define REG_USB_ISTAT_RESUME            (uint8_t)0x20           //
+#define REG_USB_ISTAT_SLEEP             (uint8_t)0x10           //
+#define REG_USB_ISTAT_TOKDNE            (uint8_t)0x08           //
+#define REG_USB_ISTAT_SOFTOK            (uint8_t)0x04           //
+#define REG_USB_ISTAT_ERROR             (uint8_t)0x02           //
+#define REG_USB_ISTAT_USBRST            (uint8_t)0x01           //
 #define REG_USB0_INTEN                  0x40072084 // Interrupt Enable Register
-#define REG_USB_INTEN_STALLEN           (uint8_t)0x80           // 
-#define REG_USB_INTEN_ATTACHEN          (uint8_t)0x40           // 
-#define REG_USB_INTEN_RESUMEEN          (uint8_t)0x20           // 
-#define REG_USB_INTEN_SLEEPEN           (uint8_t)0x10           // 
-#define REG_USB_INTEN_TOKDNEEN          (uint8_t)0x08           // 
-#define REG_USB_INTEN_SOFTOKEN          (uint8_t)0x04           // 
-#define REG_USB_INTEN_ERROREN           (uint8_t)0x02           // 
-#define REG_USB_INTEN_USBRSTEN          (uint8_t)0x01           // 
+#define REG_USB_INTEN_STALLEN           (uint8_t)0x80           //
+#define REG_USB_INTEN_ATTACHEN          (uint8_t)0x40           //
+#define REG_USB_INTEN_RESUMEEN          (uint8_t)0x20           //
+#define REG_USB_INTEN_SLEEPEN           (uint8_t)0x10           //
+#define REG_USB_INTEN_TOKDNEEN          (uint8_t)0x08           //
+#define REG_USB_INTEN_SOFTOKEN          (uint8_t)0x04           //
+#define REG_USB_INTEN_ERROREN           (uint8_t)0x02           //
+#define REG_USB_INTEN_USBRSTEN          (uint8_t)0x01           //
 #define REG_USB0_ERRSTAT                0x40072088 // Error Interrupt Status Register
-#define REG_USB_ERRSTAT_BTSERR          (uint8_t)0x80           // 
-#define REG_USB_ERRSTAT_DMAERR          (uint8_t)0x20           // 
-#define REG_USB_ERRSTAT_BTOERR          (uint8_t)0x10           // 
-#define REG_USB_ERRSTAT_DFN8            (uint8_t)0x08           // 
-#define REG_USB_ERRSTAT_CRC16           (uint8_t)0x04           // 
-#define REG_USB_ERRSTAT_CRC5EOF         (uint8_t)0x02           // 
-#define REG_USB_ERRSTAT_PIDERR          (uint8_t)0x01           // 
+#define REG_USB_ERRSTAT_BTSERR          (uint8_t)0x80           //
+#define REG_USB_ERRSTAT_DMAERR          (uint8_t)0x20           //
+#define REG_USB_ERRSTAT_BTOERR          (uint8_t)0x10           //
+#define REG_USB_ERRSTAT_DFN8            (uint8_t)0x08           //
+#define REG_USB_ERRSTAT_CRC16           (uint8_t)0x04           //
+#define REG_USB_ERRSTAT_CRC5EOF         (uint8_t)0x02           //
+#define REG_USB_ERRSTAT_PIDERR          (uint8_t)0x01           //
 #define REG_USB0_ERREN                  0x4007208C // Error Interrupt Enable Register
-#define REG_USB_ERREN_BTSERREN          (uint8_t)0x80           // 
-#define REG_USB_ERREN_DMAERREN          (uint8_t)0x20           // 
-#define REG_USB_ERREN_BTOERREN          (uint8_t)0x10           // 
-#define REG_USB_ERREN_DFN8EN            (uint8_t)0x08           // 
-#define REG_USB_ERREN_CRC16EN           (uint8_t)0x04           // 
-#define REG_USB_ERREN_CRC5EOFEN         (uint8_t)0x02           // 
-#define REG_USB_ERREN_PIDERREN          (uint8_t)0x01           // 
+#define REG_USB_ERREN_BTSERREN          (uint8_t)0x80           //
+#define REG_USB_ERREN_DMAERREN          (uint8_t)0x20           //
+#define REG_USB_ERREN_BTOERREN          (uint8_t)0x10           //
+#define REG_USB_ERREN_DFN8EN            (uint8_t)0x08           //
+#define REG_USB_ERREN_CRC16EN           (uint8_t)0x04           //
+#define REG_USB_ERREN_CRC5EOFEN         (uint8_t)0x02           //
+#define REG_USB_ERREN_PIDERREN          (uint8_t)0x01           //
 #define REG_USB0_STAT                   0x40072090 // Status Register
-#define REG_USB_STAT_TX                 (uint8_t)0x08           // 
-#define REG_USB_STAT_ODD                (uint8_t)0x04           // 
-#define REG_USB_STAT_ENDP(n)            (uint8_t)((n) >> 4)     // 
+#define REG_USB_STAT_TX                 (uint8_t)0x08           //
+#define REG_USB_STAT_ODD                (uint8_t)0x04           //
+#define REG_USB_STAT_ENDP(n)            (uint8_t)((n) >> 4)     //
 #define REG_USB0_CTL                    0x40072094 // Control Register
-#define REG_USB_CTL_JSTATE              (uint8_t)0x80           // 
-#define REG_USB_CTL_SE0                 (uint8_t)0x40           // 
-#define REG_USB_CTL_TXSUSPENDTOKENBUSY  (uint8_t)0x20           // 
-#define REG_USB_CTL_RESET               (uint8_t)0x10           // 
-#define REG_USB_CTL_HOSTMODEEN          (uint8_t)0x08           // 
-#define REG_USB_CTL_RESUME              (uint8_t)0x04           // 
-#define REG_USB_CTL_ODDRST              (uint8_t)0x02           // 
-#define REG_USB_CTL_USBENSOFEN          (uint8_t)0x01           // 
+#define REG_USB_CTL_JSTATE              (uint8_t)0x80           //
+#define REG_USB_CTL_SE0                 (uint8_t)0x40           //
+#define REG_USB_CTL_TXSUSPENDTOKENBUSY  (uint8_t)0x20           //
+#define REG_USB_CTL_RESET               (uint8_t)0x10           //
+#define REG_USB_CTL_HOSTMODEEN          (uint8_t)0x08           //
+#define REG_USB_CTL_RESUME              (uint8_t)0x04           //
+#define REG_USB_CTL_ODDRST              (uint8_t)0x02           //
+#define REG_USB_CTL_USBENSOFEN          (uint8_t)0x01           //
 #define REG_USB0_ADDR                   0x40072098 // Address Register
 #define REG_USB0_BDTPAGE1               0x4007209C // BDT Page Register 1
 #define REG_USB0_FRMNUML                0x400720A0 // Frame Number Register Low
@@ -633,9 +634,9 @@
 #define REG_USB_USBCTRL_SUSP            (uint8_t)0x80           // Places the USB transceiver into the suspend state.
 #define REG_USB_USBCTRL_PDE             (uint8_t)0x40           // Enables the weak pulldowns on the USB transceiver.
 #define REG_USB0_OBSERVE                0x40072104 // USB OTG Observe Register
-#define REG_USB_OBSERVE_DPPU            (uint8_t)0x80           // 
-#define REG_USB_OBSERVE_DPPD            (uint8_t)0x40           // 
-#define REG_USB_OBSERVE_DMPD            (uint8_t)0x10           // 
+#define REG_USB_OBSERVE_DPPU            (uint8_t)0x80           //
+#define REG_USB_OBSERVE_DPPD            (uint8_t)0x40           //
+#define REG_USB_OBSERVE_DMPD            (uint8_t)0x10           //
 #define REG_USB0_CONTROL                0x40072108 // USB OTG Control Register
 #define REG_USB_CONTROL_DPPULLUPNONOTG  (uint8_t)0x10           //  Provides control of the DP PULLUP in the USB OTG module, if USB is configured in non-OTG device mode.
 #define REG_USB0_USBTRC0                0x4007210C // USB Transceiver Control Register 0

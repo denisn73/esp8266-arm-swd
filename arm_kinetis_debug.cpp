@@ -89,53 +89,6 @@ bool ARMKinetisDebug::reset()
     return true;
 }
 
-bool ARMKinetisDebug::debugHalt()
-{
-
-    /*
-     * Enable debug, request a halt, and read back status.
-     *
-     * This part is somewhat timing critical, since we're racing against the watchdog
-     * timer. Avoid memWait() by calling the lower-level interface directly.
-     *
-     * Since this is expected to fail a bunch before succeeding, mute errors temporarily.
-     */
-
-    unsigned haltRetries = 10000;
-    LogLevel savedLogLevel;
-    uint32_t dhcsr;
-
-    // Point at the debug halt control/status register. We disable MEM-AP autoincrement,
-    // and leave TAR pointed at DHCSR for the entire loop.
-    if (memWriteCSW(CSW_32BIT) && apWrite(MEM_TAR, REG_SCB_DHCSR)) {
-
-        setLogLevel(LOG_NONE, savedLogLevel);
-
-        while (haltRetries) {
-            haltRetries--;
-
-            if (!apWrite(MEM_DRW, 0xA05F0003))
-                continue;
-            if (!apRead(MEM_DRW, dhcsr))
-                continue;
-
-            if (dhcsr & (1 << 17)) {
-                // Halted!
-                break;
-            }
-        }
-
-        setLogLevel(savedLogLevel);
-    }
-
-    if (!haltRetries) {
-        log(LOG_ERROR, "ARMKinetisDebug: Failed to put CPU in debug halt state. (DHCSR: %08x)", dhcsr);
-        return false;
-    }
-
-    return true;
-}
-
 bool ARMKinetisDebug::initK20()
 {
     /*
