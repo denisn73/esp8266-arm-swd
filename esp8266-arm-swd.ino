@@ -237,6 +237,7 @@ bool streamFileIfExists(String path)
     if (SPIFFS.exists(path)) {
         String contentType = getContentType(path);
         File f = SPIFFS.open(path, "r");
+        server.sendHeader("Cache-Control", "max-age=36000");
         server.streamFile(f, contentType);
         f.close();
         return true;
@@ -254,7 +255,7 @@ void handleStaticFile()
     if (!streamFileIfExists(path) &&
         !streamFileIfExists(path + ".html")) {
         server.send(404, "text/plain",
-            "File not found in ESP8266FS flash.\n"
+            "File not found,\nin ESP8266FS flash.\n\n"
             "Did you run Tools -> ESP8266 Sketch Data Upload?");
     }
 }

@@ -351,14 +351,23 @@ var RefreshController = (function() {
         // For this, we poll.
 
         function poll() {
-            if (!currentRequest) {
-                beginRequest();
+            if (windowLoaded) {
+                if (!currentRequest) {
+                    beginRequest();
+                }
+                setTimeout(poll, 250);
             }
-            setTimeout(poll, 250);
         }
 
         // Issue the first request if we need to, and set the timer
         poll();
+    });
+    window.addEventListener('unload', function () {
+        // Stop requests ASAP when navigating away
+        windowLoaded = false;
+        if (currentRequest) {
+            currentRequest.abort();
+        }
     });
 
     return {
