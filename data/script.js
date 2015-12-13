@@ -201,10 +201,15 @@ let RefreshController = (function() {
         return function(element) {
             if (!element.cache) {
                 let r = element.getBoundingClientRect();
-                element.cache = {
-                    top: r.top - bodyTop,
-                    bottom: r.bottom - bodyTop
-                };
+                if (r && r.width && r.height) {
+                    element.cache = {
+                        top: r.top - bodyTop,
+                        bottom: r.bottom - bodyTop
+                    };
+                } else {
+                    // Not (yet) visible; try again later.
+                    return false;
+                }
             }
             return (element.cache.bottom + bodyTop >= 0 &&
                     element.cache.top + bodyTop <= winHeight);
@@ -315,10 +320,24 @@ let RefreshController = (function() {
 
     var windowLoaded = false;
     window.addEventListener('load', function () {
+
+        // Start allowing our own requests after the page loads.
         windowLoaded = true;
-        if (!currentRequest) {
-            beginRequest();
+
+        // Normally the request cycle is maintained explicitly
+        // and kickstarted immediately by scroll events,
+        // but there are still some edge cases we don't catch.
+        // For this, we poll.
+
+        function poll() {
+            if (!currentRequest) {
+                beginRequest();
+            }
+            setTimeout(poll, 250);
         }
+
+        // Issue the first request if we need to, and set the timer
+        poll();
     });
 
     return {
