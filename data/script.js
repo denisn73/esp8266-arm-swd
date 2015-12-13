@@ -6,6 +6,7 @@
 //   If disconnected, the entire contents are replaced with an error
 //   If successful, the contents are shown.
 //   Also, optional info is written to the 'result-element'
+//   If there's a 'loading-element', it's hidden after loading finishes.
 
 var TargetInfo = document.registerElement('swd-begin', {
     prototype: Object.create(HTMLElement.prototype, {
@@ -23,6 +24,11 @@ var TargetInfo = document.registerElement('swd-begin', {
         }},
 
         render: { value: function(json) {
+            var loadingAttr = this.attributes['loading-element'];
+            if (loadingAttr) {
+                document.getElementById(loadingAttr.value).style.display = 'none';
+            }
+
             if (json.connected) {
                 var resultsAttr = this.attributes['result-element'];
                 if (resultsAttr) {
