@@ -61,7 +61,7 @@ ul li:before {
     color: #D0D0D0;
 }
 .mem-loading {
-    background: #ddd;
+    background: rgba(0,0,0,0.1);
 }
 .mem-changing {
     font-weight: bold;

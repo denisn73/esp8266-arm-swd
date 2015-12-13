@@ -40,8 +40,7 @@
 
 <table>
 
-<tr><th>SCS</th><th></th><th>ARMv6M System Control Space</th></tr>
-
+<tr><th>ARMv6M</th><th></th><th>System Control Block</th></tr>
 	<tr><td>ACTLR</td><td><swd-hexedit addr="0xe000e008" count="1"></swd-hexedit></td><td>Auxiliary Control Register</td></tr>
 	<tr><td>CPUID</td><td><swd-hexedit addr="0xe000ed00" count="1"></swd-hexedit></td><td>CPUID Base Register</td></tr>
 	<tr><td>ICSR</td><td><swd-hexedit addr="0xe000ed04" count="1"></swd-hexedit></td><td>Interrupt Control State Register</td></tr>
@@ -54,13 +53,26 @@
 	<tr><td>SHCSR</td><td><swd-hexedit addr="0xe000ed24" count="1"></swd-hexedit></td><td>System Handler Control and State Register</td></tr>
 	<tr><td>DFSR</td><td><swd-hexedit addr="0xe000ed30" count="1"></swd-hexedit></td><td>Debug Fault Status Register</td></tr>
 
+<tr><th>ARMv6M</th><th></th><th>System Timer</th></tr>
 	<tr><td>SYST_CSR</td><td><swd-hexedit addr="0xe000e010" count="1"></swd-hexedit></td><td>SysTick Control and Status Register</td></tr>
 	<tr><td>SYST_RVR</td><td><swd-hexedit addr="0xe000e014" count="1"></swd-hexedit></td><td>SysTick Reload Value Register</td></tr>
 	<tr><td>SYST_CVR</td><td><swd-hexedit addr="0xe000e018" count="1"></swd-hexedit></td><td>SysTick Current Value Register</td></tr>
 	<tr><td>SYST_CALIB</td><td><swd-hexedit addr="0xe000e01c" count="1"></swd-hexedit></td><td>SysTick Calibration Value Register</td></tr>
 
-<tr><th>kinetis</th><th></th><th>Freescale Kinetis Series</th></tr>
+<tr><th>ARMv6M</th><th></th><th>Nested Vectored Interrupt Controller</th></tr>
+	<tr><td>NVIC_ISER</td><td><swd-hexedit addr="0xe000e100" count="1"></swd-hexedit></td><td>Interrupt Set-Enable Register</td></tr>
+	<tr><td>NVIC_ICER</td><td><swd-hexedit addr="0xe000e180" count="1"></swd-hexedit></td><td>Interrupt Clear-Enable Register</td></tr>
+	<tr><td>NVIC_ISPR</td><td><swd-hexedit addr="0xe000e200" count="1"></swd-hexedit></td><td>Interrupt Set-Pending Register</td></tr>
+	<tr><td>NVIC_ICPR</td><td><swd-hexedit addr="0xe000e280" count="1"></swd-hexedit></td><td>Interrupt Clear-Pending Register</td></tr>
+	<tr><td>NVIC_IPRn</td><td><swd-hexedit addr="0xe000e01c" count="8" columns="1"></swd-hexedit></td><td>Interrupt Priority Registers</td></tr>
 
+	<tr><td>MPU_TYPE</td><td><swd-hexedit addr="0xe000ed90" count="1"></swd-hexedit></td><td>MPU Type Register</td></tr>
+	<tr><td>MPU_CTRL</td><td><swd-hexedit addr="0xe000ed94" count="1"></swd-hexedit></td><td>MPU Control Register</td></tr>
+	<tr><td>MPU_RNR</td><td><swd-hexedit addr="0xe000ed98" count="1"></swd-hexedit></td><td>MPU Region Number Register</td></tr>
+	<tr><td>MPU_RBAR</td><td><swd-hexedit addr="0xe000ed9c" count="1"></swd-hexedit></td><td>MPU Region Base Address Register</td></tr>
+	<tr><td>MPU_RASR</td><td><swd-hexedit addr="0xe000eda0" count="1"></swd-hexedit></td><td>MPU Region Attribute and Size Register</td></tr>
+
+<tr><th>Freescale KE04</th><th></th><th>System Integration Module</th></tr>
 	<tr><td>SIM_SRSID</td><td><swd-hexedit addr="0x40048000" count="1"></swd-hexedit></td><td>System Reset Status and ID Register</td></tr>
 	<tr><td>SIM_SOPT</td><td><swd-hexedit addr="0x40048004" count="1"></swd-hexedit></td><td>System Options Register</td></tr>
 	<tr><td>SIM_PINSEL</td><td><swd-hexedit addr="0x40048008" count="1"></swd-hexedit></td><td>Pin Selection Register</td></tr>
@@ -70,80 +82,16 @@
 	<tr><td>SIM_UUIDMH</td><td><swd-hexedit addr="0x40048018" count="1"></swd-hexedit></td><td>Universally Unique Identifier Middle High Register</td></tr>
 	<tr><td>SIM_CLKDIV</td><td><swd-hexedit addr="0x4004801c" count="1"></swd-hexedit></td><td>Clock Divider Register</td></tr>
 
+<tr><th>Freescale KE04</th><th></th><th>Port Control</th></tr>
 	<tr><td>PORT_IOFLT</td><td><swd-hexedit addr="0x40049000" count="1"></swd-hexedit></td><td>Port Filter Register</td></tr>
 	<tr><td>PORT_PUEL</td><td><swd-hexedit addr="0x40049004" count="1"></swd-hexedit></td><td>Port Pullup Enable Low Register</td></tr>
 	<tr><td></td><td><swd-hexedit addr="0x40049008" count="1"></swd-hexedit></td><td></td></tr>
 	<tr><td>PORT_HDRIVE</td><td><swd-hexedit addr="0x4004900c" count="1" ></swd-hexedit></td><td>Port high drive enable register</td></tr>
 
+<tr><th>Freescale KE04</th><th></th><th>General-Purpose Inout/Output</th></tr>
 	<tr><td>GPIOA_PDOR</td><td><swd-hexedit addr="0x400ff000" count="1" ></swd-hexedit></td><td>Port Data Output Register</td></tr>
-	<tr><td>GPIOA_PSOR</td><td><swd-hexedit addr="0x400ff004" count="1" ></swd-hexedit></td><td>Port Set Output Register<br/>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x80000000">D7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x40000000">D6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x20000000">D5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x10000000">D4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x08000000">D3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x04000000">D2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x02000000">D1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x01000000">D0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00800000">C7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00400000">C6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00200000">C5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00100000">C4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00080000">C3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00040000">C2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00020000">C1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00010000">C0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00008000">B7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00004000">B6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00002000">B5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00001000">B4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000800">B3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000400">B2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000200">B1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000100">B0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000080">A7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000040">A6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000020">A5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000010">A4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000008">A3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000004">A2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000002">A1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff004=0x00000001">A0</a>
-		</td></tr>
-	<tr><td>GPIOA_PCOR</td><td><swd-hexedit addr="0x400ff008" count="1" ></swd-hexedit></td><td>Port Clear Output Register<br/>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x80000000">D7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x40000000">D6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x20000000">D5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x10000000">D4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x08000000">D3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x04000000">D2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x02000000">D1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x01000000">D0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00800000">C7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00400000">C6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00200000">C5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00100000">C4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00080000">C3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00040000">C2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00020000">C1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00010000">C0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00008000">B7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00004000">B6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00002000">B5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00001000">B4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000800">B3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000400">B2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000200">B1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000100">B0</a><br/>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000080">A7</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000040">A6</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000020">A5</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000010">A4</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000008">A3</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000004">A2</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000002">A1</a>
-		<a is="swd-async-action" href="/api/store?0x400ff008=0x00000001">A0</a>
-		</td></tr>
+	<tr><td>GPIOA_PSOR</td><td><swd-hexedit addr="0x400ff004" count="1" ></swd-hexedit></td><td>Port Set Output Register<br/></td>
+	<tr><td>GPIOA_PCOR</td><td><swd-hexedit addr="0x400ff008" count="1" ></swd-hexedit></td><td>Port Clear Output Register<br/></td>
 	<tr><td>GPIOA_PTOR</td><td><swd-hexedit addr="0x400ff00c" count="1" ></swd-hexedit></td><td>Port Toggle Output Register<br/>
 		<a is="swd-async-action" href="/api/store?0x400ff00c=0x80000000">D7</a>
 		<a is="swd-async-action" href="/api/store?0x400ff00c=0x40000000">D6</a>
