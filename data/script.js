@@ -270,9 +270,15 @@ var RefreshController = (function() {
             return;
         }
 
+        // The cyclePending list is sorted by ascending address, but it may
+        // have duplicates. Look for the first contiguous group of addresses,
+        // to make the next request.
+
         var src = cyclePending[0].src;
         var firstAddr = cyclePending[0].addr;
         var wordCount = 0;
+        var elementCount = 0;
+        var elementsForEachWord = [];
 
         var now = Date.now();
         for (var el of cyclePending) {
@@ -280,26 +286,39 @@ var RefreshController = (function() {
                 // Enough words
                 break;
             }
+            if (el.renderTimestamp && (now - el.renderTimestamp) < minimumUpdateIntervalMillis) {
+                // This word has already been updated very recently; skip it on this cycle
+                elementCount++;
+                continue;
+            }
             if (el.src != src) {
                 // Different source URLs, can't combine
                 break;
             }
-            if (el.addr != firstAddr + wordCount * 4) {
-                // Addresses stopped being contiguous
+
+            var nextAddr = firstAddr + wordCount * 4;
+
+            if (wordCount && el.addr == nextAddr - 4) {
+                // Oh, this is a duplicate address. Request it only once, and broadcast to all interested elements
+                el.className = 'mem-loading';
+                elementCount++;
+                elementsForEachWord[wordCount-1].push(el);
+
+            } else if (el.addr == nextAddr) {
+                // Load another word contiguously. This case also handles the first word.
+                el.className = 'mem-loading';
+                elementCount++;
+                elementsForEachWord.push([ el ]);
+                wordCount++;
+
+            } else {
+                // Addresses stopped being contiguous, finish collecting now.
                 break;
             }
-            if (el.renderTimestamp && (now - el.renderTimestamp) < minimumUpdateIntervalMillis) {
-                // This word has already been updated very recently
-                break;
-            }
-            // Ok, mark as loading
-            wordCount++;
-            el.className = 'mem-loading';
         }
 
-        // Dequeue from the pending list
-        var elements = cyclePending.slice(0, wordCount);
-        cyclePending = cyclePending.slice(wordCount);
+        // Dequeue from the pending list all at once
+        cyclePending = cyclePending.slice(elementCount);
 
         var req = new XMLHttpRequest();
         currentRequest = req;
@@ -311,8 +330,10 @@ var RefreshController = (function() {
             beginRequest();
 
             var response = JSON.parse(req.responseText);
-            for (var i = 0; i < elements.length; i++) {
-                elements[i].render(response[i]);
+            for (var i = 0; i < elementsForEachWord.length; i++) {
+                for (var el of elementsForEachWord[i]) {
+                    el.render(response[i]);
+                }
             }
         });
         req.send();
