@@ -7,12 +7,12 @@
 //   If successful, the contents are shown.
 //   Also, optional info is written to the 'result-element'
 
-let TargetInfo = document.registerElement('swd-begin', {
+var TargetInfo = document.registerElement('swd-begin', {
     prototype: Object.create(HTMLElement.prototype, {
 
         createdCallback: { value: function() {
-            let el = this;
-            let req = new XMLHttpRequest();
+            var el = this;
+            var req = new XMLHttpRequest();
             el.style.display = 'none';
             el.api = el.getAttribute('api') || '/api';
             req.open('GET', el.api + '/begin');
@@ -24,7 +24,7 @@ let TargetInfo = document.registerElement('swd-begin', {
 
         render: { value: function(json) {
             if (json.connected) {
-                let resultsAttr = this.attributes['result-element'];
+                var resultsAttr = this.attributes['result-element'];
                 if (resultsAttr) {
                     document.getElementById(resultsAttr.value).innerHTML = `
                         Connected to the ARM debug port. <br/>
@@ -46,12 +46,12 @@ let TargetInfo = document.registerElement('swd-begin', {
 
 // <swd-async-action> is a modified hyperlink that shows pass/fail asynchronously
 
-let AsyncAction = document.registerElement('swd-async-action', {
+var AsyncAction = document.registerElement('swd-async-action', {
     extends: 'a',
     prototype: Object.create(HTMLAnchorElement.prototype, {
 
         createdCallback: { value: function() {
-            let el = this;
+            var el = this;
 
             this.addEventListener('click', function (evt) {
                 el.action();
@@ -64,15 +64,15 @@ let AsyncAction = document.registerElement('swd-async-action', {
         }},
 
         action: { value: function(json) {
-            let el = this;
-            let req = new XMLHttpRequest();
+            var el = this;
+            var req = new XMLHttpRequest();
 
             el.resultElement.className = 'result hidden';
             el.resultElement.textContent = '';
 
             req.open('GET', this.href);
             req.addEventListener('loadend', function () {
-                let response = JSON.parse(req.responseText);
+                var response = JSON.parse(req.responseText);
                 el.resultElement.textContent = response ? ' OK! ' : ' failed ';
                 el.resultElement.className = 'result visible';
                 setTimeout( function() {
@@ -86,7 +86,7 @@ let AsyncAction = document.registerElement('swd-async-action', {
 
 // <swd-hexedit> is an editable hex dump with live updates
 
-let Hexedit = document.registerElement('swd-hexedit', {
+var Hexedit = document.registerElement('swd-hexedit', {
     prototype: Object.create(HTMLElement.prototype, {
 
         createdCallback: { value: function() {
@@ -100,7 +100,7 @@ let Hexedit = document.registerElement('swd-hexedit', {
 
             if (this.navigation) {
                 // Render automaticaly when the nav parameters change
-                let el = this;
+                var el = this;
                 window.addEventListener('hashchange', function() {
                     el.render();
                 });
@@ -110,20 +110,20 @@ let Hexedit = document.registerElement('swd-hexedit', {
         render: { value: function() {
             // Keep nav parameters fresh on each render
             if (this.navigation) {
-                let params = getHashParams();
+                var params = getHashParams();
                 if ('addr' in params) this.addr = parseInt(params['addr'], 0);
                 if ('count' in params) this.count = parseInt(params['count'], 0);
                 if ('columns' in params) this.columns = parseInt(params['columns'], 0);
             }
 
             // Hex dump body, made of <swd-hexword> elements
-            let parts = [];
-            for (let i = 0, addr = this.addr; i < this.count;) {
+            var parts = [];
+            for (var i = 0, addr = this.addr; i < this.count;) {
                 parts.push('<div>')
                 if (this.headings) {
                     parts.push(toHex32(addr) + ':');
                 }
-                for (let col = 0; i < this.count && col < this.columns; col++) {
+                for (var col = 0; i < this.count && col < this.columns; col++) {
                     parts.push(` <span is="swd-hexword" addr="${addr}" api="${this.api}"></span>`);
                     addr += 4;
                     i++;
@@ -138,12 +138,12 @@ let Hexedit = document.registerElement('swd-hexedit', {
 // <swd-hexnav> is a navigation link for use with <swd-hexedit navigation="true">.
 // The 'nav-step' parameter indicates how many bytes to step forward or backward in memory
 
-let Hexnav = document.registerElement('swd-hexnav', {
+var Hexnav = document.registerElement('swd-hexnav', {
     extends: 'a',
     prototype: Object.create(HTMLAnchorElement.prototype, {
 
         createdCallback: { value: function() {
-            let el = this;
+            var el = this;
             this.addEventListener('click', function (evt) {
                 el.action();
                 evt.preventDefault();
@@ -151,10 +151,10 @@ let Hexnav = document.registerElement('swd-hexnav', {
         }},
 
         action: { value: function(json) {
-            let el = this;
-            let step = parseInt(this.getAttribute('nav-step'), 0) || 1;
-            let addr = parseInt(getHashParams()['addr']) || 0;
-            let newAddr = Math.max(addr + step, 0);
+            var el = this;
+            var step = parseInt(this.getAttribute('nav-step'), 0) || 1;
+            var addr = parseInt(getHashParams()['addr']) || 0;
+            var newAddr = Math.max(addr + step, 0);
             setHashParam('addr', `0x${toHex32(newAddr)}`);
         }}
     })
@@ -163,17 +163,17 @@ let Hexnav = document.registerElement('swd-hexnav', {
 // The internal RefreshController trackskeeps track of
 // all automatically updating values within a single window.
 
-let RefreshController = (function() {
+var RefreshController = (function() {
 
-    const maxWordsPerRequest = 32;
-    const minimumUpdateIntervalMillis = 100;
+    var maxWordsPerRequest = 32;
+    var minimumUpdateIntervalMillis = 100;
 
     // The Set can quickly keep track of the set of elements
     // without worrying about sorting order, then we lazily create
     // an index sorted by first API URL then ascending address.
 
-    let elementSet = new Set();
-    let elementIndex = null;
+    var elementSet = new Set();
+    var elementIndex = null;
 
     function makeIndex() {
         elementIndex = Array.from(elementSet);
@@ -195,12 +195,12 @@ let RefreshController = (function() {
             return function() { return false; }
         }
 
-        let bodyTop = document.body.getBoundingClientRect().top;
-        let winHeight = document.documentElement.clientHeight;
+        var bodyTop = document.body.getBoundingClientRect().top;
+        var winHeight = document.documentElement.clientHeight;
 
         return function(element) {
             if (!element.cache) {
-                let r = element.getBoundingClientRect();
+                var r = element.getBoundingClientRect();
                 if (r && r.width && r.height) {
                     element.cache = {
                         top: r.top - bodyTop,
@@ -226,8 +226,8 @@ let RefreshController = (function() {
     // Cycles also end any time the window scrolls, or new elements
     // are registered or unregistered.
 
-    let cyclePending = null;
-    let currentRequest = null;
+    var cyclePending = null;
+    var currentRequest = null;
 
     window.addEventListener('scroll', function() {
         cyclePending = null;
@@ -245,10 +245,10 @@ let RefreshController = (function() {
             makeIndex();
         }
 
-        let isVisible = cachedVisibilityTester();
+        var isVisible = cachedVisibilityTester();
         cyclePending = [];
 
-        for (let el of elementIndex) {
+        for (var el of elementIndex) {
             if (isVisible(el)) {
                 cyclePending.push(el);
             } else {
@@ -270,12 +270,12 @@ let RefreshController = (function() {
             return;
         }
 
-        let api = cyclePending[0].api;
-        let firstAddr = cyclePending[0].addr;
-        let wordCount = 0;
+        var api = cyclePending[0].api;
+        var firstAddr = cyclePending[0].addr;
+        var wordCount = 0;
 
-        let now = Date.now();
-        for (let el of cyclePending) {
+        var now = Date.now();
+        for (var el of cyclePending) {
             if (wordCount >= maxWordsPerRequest) {
                 // Enough words
                 break;
@@ -298,20 +298,20 @@ let RefreshController = (function() {
         }
 
         // Dequeue from the pending list
-        let elements = cyclePending.slice(0, wordCount);
+        var elements = cyclePending.slice(0, wordCount);
         cyclePending = cyclePending.slice(wordCount);
 
-        let req = new XMLHttpRequest();
+        var req = new XMLHttpRequest();
         currentRequest = req;
-        let url = `${api}/load?addr=0x${toHex32(firstAddr)}&count=${wordCount}`;
+        var url = `${api}/load?addr=0x${toHex32(firstAddr)}&count=${wordCount}`;
 
         req.open('GET', url);
         req.addEventListener('loadend', function () {
             currentRequest = null;
             beginRequest();
 
-            let response = JSON.parse(req.responseText);
-            for (let i = 0; i < elements.length; i++) {
+            var response = JSON.parse(req.responseText);
+            for (var i = 0; i < elements.length; i++) {
                 elements[i].render(response[i]);
             }
         });
@@ -364,7 +364,7 @@ let RefreshController = (function() {
 
 // <swd-hexword> is a single live-updating editable hex word
 
-let Hexword = document.registerElement('swd-hexword', {
+var Hexword = document.registerElement('swd-hexword', {
     extends: 'span',
     prototype: Object.create(HTMLSpanElement.prototype, {
 
@@ -378,7 +378,7 @@ let Hexword = document.registerElement('swd-hexword', {
             this.updateOnBlur = false;
 
             this.addEventListener('keydown', function(event) {
-                let el = event.target;
+                var el = event.target;
                 if (event.keyCode == 13) {
                     // This is enter or shift+enter.
                     // Send the value immediately, even if it hasn't changed,
@@ -391,7 +391,7 @@ let Hexword = document.registerElement('swd-hexword', {
             });
 
             this.addEventListener('input', function(event) {
-                let el = event.target;
+                var el = event.target;
                 if (el == document.activeElement) {
                     el.updateOnBlur = true;
                 } else {
@@ -406,7 +406,7 @@ let Hexword = document.registerElement('swd-hexword', {
 
             this.addEventListener('blur', function(evt) {
                 // Implicit send if the value changed when navigating away
-                let el = event.target;
+                var el = event.target;
                 if (el.updateOnBlur) {
                     el.updateOnBlur = false;
                     el.updateValue();
@@ -423,11 +423,11 @@ let Hexword = document.registerElement('swd-hexword', {
         }},
 
         selectAll: { value: function() {
-            let el = this;
+            var el = this;
             requestAnimationFrame(function() {
-                let range = document.createRange();
+                var range = document.createRange();
                 range.selectNodeContents(el);
-                let sel = window.getSelection();
+                var sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(range);
             });
@@ -442,7 +442,7 @@ let Hexword = document.registerElement('swd-hexword', {
 
         render: { value: function(word) {
             // We have some memory or 'null' as an error marker
-            let oldTimestamp = this.renderTimestamp;
+            var oldTimestamp = this.renderTimestamp;
             this.renderTimestamp = Date.now();
 
             if (this == document.activeElement) {
@@ -454,8 +454,8 @@ let Hexword = document.registerElement('swd-hexword', {
                 this.textContent = '////////';
                 this.className = 'mem-error';
             } else {
-                let textValue = toHex32(word);
-                let oldValue = this.textContent;
+                var textValue = toHex32(word);
+                var oldValue = this.textContent;
                 this.textContent = textValue;
                 if (oldTimestamp == null) {
                     // First read after it was invalid
@@ -471,8 +471,8 @@ let Hexword = document.registerElement('swd-hexword', {
         updateValue: { value: function() {
             // Clean up the entered hex value, and transmit if it doesn't match savedValue
 
-            let oldValue = this.savedValue;
-            let newValue = parseInt(this.textContent, 16);
+            var oldValue = this.savedValue;
+            var newValue = parseInt(this.textContent, 16);
             if (isNaN(newValue)) {
                 newValue = oldValue || 0;
             }
@@ -486,14 +486,14 @@ let Hexword = document.registerElement('swd-hexword', {
 
                 // Asynchronous write. Usually results will be apparent due to the
                 // periodic read cycle, but we also try to keep the style updated
-                // to indicate confirmed completion of the memory store operation.
+                // to indicate confirmed compvarion of the memory store operation.
 
-                let url = `${this.api}/store?0x${toHex32(this.addr)}=0x${toHex32(newValue)}`;
-                let el = this;
-                let req = new XMLHttpRequest();
+                var url = `${this.api}/store?0x${toHex32(this.addr)}=0x${toHex32(newValue)}`;
+                var el = this;
+                var req = new XMLHttpRequest();
                 req.open('GET', url);
                 req.addEventListener('loadend', function () {
-                    let result = JSON.parse(req.responseText)[0].result;
+                    var result = JSON.parse(req.responseText)[0].result;
                     if (el.className == 'mem-pending') {
                         el.className = result ? 'mem-okay' : 'mem-error';
                     }
@@ -509,8 +509,8 @@ function getHashParams() {
     // Parse key-value params from the fragment portion of the URI.
     // http://stackoverflow.com/a/4198132
 
-    let hashParams = {};
-    let e,
+    var hashParams = {};
+    var e,
         a = /\+/g,  // Regex for replacing addition symbol with a space
         r = /([^&;=]+)=?([^&;]*)/g,
         d = function (s) { return decodeURIComponent(s.replace(a, ' ')); },
@@ -525,10 +525,10 @@ function getHashParams() {
 function setHashParam(key, value) {
     // Change one value from the fragment portion of the URI, leaving the others.
 
-    let parts = window.location.hash.substring(1).split('&');
-    let newPart = `${key}=${encodeURIComponent(value)}`;
+    var parts = window.location.hash.substring(1).split('&');
+    var newPart = `${key}=${encodeURIComponent(value)}`;
 
-    for (let i = 0; i < parts.length; i++) {
+    for (var i = 0; i < parts.length; i++) {
         if (parts[i].startsWith(key + '=')) {
             // Replace an existing key
             parts[i] = newPart;
