@@ -16,7 +16,7 @@ $(NAME).bin: $(NAME).elf
 	arm-none-eabi-objcopy $< -O binary $@
 
 $(NAME).elf: $(NAME).cpp
-	arm-none-eabi-gcc -nostdlib -march=armv7-m -mthumb -Os -o $@ $<
+	arm-none-eabi-gcc -nostdlib -mcpu=cortex-m0 -mthumb -Os -o $@ $<
 
 clean:
 	rm -f $(NAME).elf $(NAME).bin

@@ -32,13 +32,17 @@
 			<a is="swd-async-action" href="/api/mem/write?0x40048008=0&0x400ff014=0x00300800&0x400ff000=0x00300800">off</a></li>
 		<li>Now <a is="swd-async-action" href="/api/halt">halt the CPU</a> and let's have some scratch RAM:
 			<p><swd-hexedit addr="0x20000000" count="32"></swd-hexedit></p></li>
-		<li><a is="swd-async-action" href="/api/mem/write?0x20000000=0x22004b08&.=0xf503601a&.=0x4a072337&.=0x601a330c&.=0x0301f640&.=0xd0003b01&.=0xf241e7fc&.=0x3b010301&.=0xe7fcd0f6&.=0x40048008&.=0x00300800&.=0x7fffffd4&.=0x00000001">Load a small program</a> into the scratch RAM</li>
+		<li><a is="swd-async-action"
+			href="/api/mem/write?0x20000000=0x22004b0a&.=0x4a0a601a&.=0x601a4b0a&.=0x4a0b4b0a&.=0x4b0b6013&.=0x2b003b01&.=0x2380d1fc&.=0x6013035b&.=0x3b014b07&.=0xd1fc2b00&.=0x46c0e7f0&.=0x40048008&.=0x00300800&.=0x400ff014&.=0x00200800&.=0x400ff000&.=0x00123456&.=0x7fffffbc&.=0x00000001"
+			>Load a small program</a> into the scratch RAM</li>
 		<li><a is="swd-async-action" href="/api/reg/write?0x3c=0x20000000">Set the program counter</a>
 			(<span is="swd-hexword" src="/api/reg" addr="0x3c"></span>)
 			to the top of our program</li>
 	    <li>The PC <i>sample</i> register (<span is="swd-hexword" addr="0xe000101c"></span>) tells you where the <i>running</i> CPU is</li>
 	    <li><a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0001">Let the CPU run!</a>
 	    	(or try a <a is="swd-async-action" href="/api/mem/write?0xE000EDF0=0xA05F0005">single step</a>)</li>
+	    <li>While the program is running, you can modify its delay value:
+	    	<span is="swd-hexword" addr="0x20000040"></span></li>
 	</ul>
 	<p>
 		[<a href="https://github.com/scanlime/esp8266-arm-swd/blob/master/data/mmio.html">play along</a>]
